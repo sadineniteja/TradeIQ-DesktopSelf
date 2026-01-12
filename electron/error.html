@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeIQ - Error</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .error-container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      max-width: 500px;
+    }
+    h1 {
+      color: #ff6b6b;
+      margin-bottom: 20px;
+    }
+    p {
+      color: #ccc;
+      line-height: 1.6;
+    }
+    .retry-btn {
+      background: #4ecdc4;
+      color: #1a1a2e;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .retry-btn:hover {
+      background: #3dbdb5;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <h1>⚠️ Server Error</h1>
+    <p>The TradeIQ server failed to start. Please make sure:</p>
+    <ul style="text-align: left;">
+      <li>Python 3.8+ is installed</li>
+      <li>All dependencies are installed (run the launcher script first)</li>
+      <li>Port 5000 is not in use by another application</li>
+    </ul>
+    <p>Try running <code>./scripts/start_mac.sh</code> manually to see error details.</p>
+    <button class="retry-btn" onclick="location.reload()">Retry</button>
+  </div>
+</body>
+</html>
+

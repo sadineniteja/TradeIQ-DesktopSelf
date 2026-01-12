@@ -1,0 +1,12 @@
+flask==3.0.0
+flask-cors==4.0.0
+openai>=2.0.0
+requests==2.31.0
+python-dotenv==1.0.0
+pydantic>=2.11.0
+rauth==0.7.3
+tweepy>=4.14.0
+pywebpush>=1.14.0
+cryptography>=41.0.0
+yfinance>=0.2.0
+

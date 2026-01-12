@@ -1,0 +1,53 @@
+{
+  "name": "tradeiq-desktop",
+  "version": "1.0.0",
+  "description": "TradeIQ Desktop Application with integrated Discord browser",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder --mac --win"
+  },
+  "keywords": [
+    "trading",
+    "stock",
+    "options",
+    "discord",
+    "signals"
+  ],
+  "author": "TradeIQ",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.tradeiq.desktop",
+    "productName": "TradeIQ",
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": "dmg",
+      "icon": "app/static/icons/icon-512x512.icns"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "app/static/icons/icon-256x256.ico"
+    },
+    "files": [
+      "app/**/*",
+      "scripts/**/*",
+      "requirements.txt",
+      "README.md",
+      "electron/**/*"
+    ],
+    "extraResources": [
+      "venv/**/*"
+    ]
+  }
+}
+

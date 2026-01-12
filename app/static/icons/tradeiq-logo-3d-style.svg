@@ -1,0 +1,105 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 3D Gradient -->
+    <radialGradient id="sphereGradient" cx="30%" cy="30%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Accent gradient -->
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Deep shadow -->
+    <filter id="deepShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4"/>
+      </feComponentTransfer>
+    </filter>
+    
+    <!-- Strong glow -->
+    <filter id="strongGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background with 3D sphere effect -->
+  <circle cx="256" cy="256" r="240" fill="url(#sphereGradient)" filter="url(#deepShadow)"/>
+  
+  <!-- Highlight for 3D sphere -->
+  <ellipse cx="220" cy="220" rx="160" ry="160" fill="rgba(255,255,255,0.25)"/>
+  <ellipse cx="200" cy="200" rx="120" ry="120" fill="rgba(255,255,255,0.15)"/>
+  
+  <!-- Main "T" with 3D extrusion effect -->
+  <g transform="translate(256, 256)">
+    <!-- T horizontal bar - 3D layers -->
+    <!-- Shadow layer -->
+    <rect x="-100" y="-140" width="200" height="50" rx="10" 
+          fill="rgba(0,0,0,0.3)" transform="translate(4, 4)"/>
+    <!-- Main layer -->
+    <rect x="-100" y="-140" width="200" height="50" rx="10" 
+          fill="white" filter="url(#strongGlow)"/>
+    <!-- Highlight layer -->
+    <rect x="-90" y="-135" width="180" height="20" rx="5" 
+          fill="rgba(255,255,255,0.6)"/>
+    
+    <!-- T vertical bar - 3D layers -->
+    <!-- Shadow layer -->
+    <rect x="-25" y="-90" width="50" height="180" rx="10" 
+          fill="rgba(0,0,0,0.3)" transform="translate(4, 4)"/>
+    <!-- Main layer -->
+    <rect x="-25" y="-90" width="50" height="180" rx="10" 
+          fill="white" filter="url(#strongGlow)"/>
+    <!-- Highlight layer -->
+    <rect x="-20" y="-85" width="20" height="170" rx="5" 
+          fill="rgba(255,255,255,0.6)"/>
+    
+    <!-- IQ with 3D spheres -->
+    <g transform="translate(130, -70)">
+      <!-- I sphere -->
+      <circle cx="0" cy="0" r="24" fill="url(#greenGradient)" filter="url(#deepShadow)"/>
+      <circle cx="-6" cy="-6" r="10" fill="rgba(255,255,255,0.4)"/>
+      <text x="0" y="8" font-family="Arial, sans-serif" font-size="20" font-weight="bold" 
+            fill="white" text-anchor="middle">I</text>
+      
+      <!-- Q sphere -->
+      <circle cx="0" cy="55" r="24" fill="url(#greenGradient)" filter="url(#deepShadow)"/>
+      <circle cx="-6" cy="49" r="10" fill="rgba(255,255,255,0.4)"/>
+      <text x="0" y="63" font-family="Arial, sans-serif" font-size="20" font-weight="bold" 
+            fill="white" text-anchor="middle">Q</text>
+      <!-- Q tail with 3D effect -->
+      <path d="M 18 60 L 28 70" stroke="url(#greenGradient)" stroke-width="5" 
+            stroke-linecap="round" filter="url(#strongGlow)"/>
+      <path d="M 18 60 L 28 70" stroke="rgba(255,255,255,0.6)" stroke-width="2" 
+            stroke-linecap="round"/>
+    </g>
+    
+    <!-- Trading chart with 3D effect -->
+    <g transform="translate(-90, 110)" opacity="0.7">
+      <!-- Chart background -->
+      <rect x="-5" y="-5" width="100" height="50" rx="5" 
+            fill="rgba(0,0,0,0.2)" filter="url(#deepShadow)"/>
+      <!-- Chart line -->
+      <path d="M 0 40 L 15 25 L 30 30 L 45 15 L 60 20 L 75 10 L 90 18" 
+            stroke="white" stroke-width="4" fill="none" stroke-linecap="round" 
+            filter="url(#strongGlow)"/>
+      <!-- Data points -->
+      <circle cx="0" cy="40" r="4" fill="white" filter="url(#strongGlow)"/>
+      <circle cx="90" cy="18" r="4" fill="white" filter="url(#strongGlow)"/>
+    </g>
+  </g>
+  
+  <!-- Outer rings for depth -->
+  <circle cx="256" cy="256" r="240" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+  <circle cx="256" cy="256" r="235" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+</svg>
+

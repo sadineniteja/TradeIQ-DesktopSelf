@@ -1,0 +1,85 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Blue gradient background -->
+    <radialGradient id="blueGradient" cx="40%" cy="30%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Green circle gradient -->
+    <radialGradient id="greenGradient" cx="40%" cy="30%">
+      <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- White glow effect -->
+    <filter id="whiteGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Soft shadow -->
+    <filter id="softShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  
+  <!-- Blue circular background with gradient -->
+  <circle cx="512" cy="512" r="480" fill="url(#blueGradient)" filter="url(#softShadow)"/>
+  
+  <!-- Glossy highlight overlay -->
+  <ellipse cx="400" cy="400" rx="350" ry="350" fill="rgba(255,255,255,0.15)"/>
+  
+  <!-- Main "T" letter - white with glow -->
+  <g transform="translate(512, 512)">
+    <!-- T horizontal bar -->
+    <rect x="-200" y="-280" width="400" height="120" rx="20" 
+          fill="white" filter="url(#whiteGlow)"/>
+    
+    <!-- T vertical bar -->
+    <rect x="-60" y="-160" width="120" height="320" rx="20" 
+          fill="white" filter="url(#whiteGlow)"/>
+    
+    <!-- Two green circles stacked vertically to the right of T -->
+    <g transform="translate(280, -80)">
+      <!-- Top green circle -->
+      <circle cx="0" cy="0" r="50" fill="url(#greenGradient)"/>
+      
+      <!-- Bottom green circle with pointer -->
+      <circle cx="0" cy="110" r="50" fill="url(#greenGradient)"/>
+      
+      <!-- Pointer/tail on bottom circle (teardrop shape) -->
+      <path d="M 35 140 Q 50 155, 65 140 Q 50 150, 35 140 Z" 
+            fill="url(#greenGradient)"/>
+      <!-- Light green highlight on pointer -->
+      <path d="M 40 142 Q 50 152, 60 142" 
+            stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none"/>
+    </g>
+    
+    <!-- White wavy line graph below the T -->
+    <g transform="translate(-180, 200)">
+      <!-- Starting dot -->
+      <circle cx="0" cy="60" r="6" fill="white" filter="url(#whiteGlow)"/>
+      
+      <!-- Wavy line -->
+      <path d="M 0 60 L 40 20 L 80 50 L 120 10 L 160 40 L 200 25 L 240 35" 
+            stroke="white" stroke-width="8" fill="none" stroke-linecap="round" 
+            stroke-linejoin="round" filter="url(#whiteGlow)"/>
+      
+      <!-- Ending dot -->
+      <circle cx="240" cy="35" r="6" fill="white" filter="url(#whiteGlow)"/>
+    </g>
+  </g>
+  
+  <!-- Outer ring for polish -->
+  <circle cx="512" cy="512" r="480" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+</svg>
+

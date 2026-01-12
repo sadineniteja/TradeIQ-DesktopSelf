@@ -1,0 +1,163 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Premium gold gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#d97706;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b45309;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Premium blue gradient -->
+    <radialGradient id="blueSphere" cx="35%" cy="35%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e3a8a;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Diamond/emerald gradient -->
+    <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6ee7b7;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#34d399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Premium shadow with multiple layers -->
+    <filter id="premiumShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="12" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Inner glow -->
+    <filter id="innerGlow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Outer glow -->
+    <filter id="outerGlow">
+      <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Metallic shine -->
+    <linearGradient id="metallicShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.8);stop-opacity:1" />
+      <stop offset="50%" style="stop-color:rgba(255,255,255,0.3);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.1);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Premium background sphere with depth -->
+  <circle cx="512" cy="512" r="480" fill="url(#blueSphere)" filter="url(#premiumShadow)"/>
+  
+  <!-- Multiple highlight layers for 3D depth -->
+  <ellipse cx="420" cy="420" rx="380" ry="380" fill="rgba(255,255,255,0.2)"/>
+  <ellipse cx="380" cy="380" rx="320" ry="320" fill="rgba(255,255,255,0.15)"/>
+  <ellipse cx="340" cy="340" rx="260" ry="260" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- Premium "T" letter with 3D extrusion -->
+  <g transform="translate(512, 512)">
+    <!-- T horizontal bar - premium 3D layers -->
+    <!-- Deep shadow -->
+    <rect x="-200" y="-280" width="400" height="100" rx="20" 
+          fill="rgba(0,0,0,0.4)" transform="translate(8, 8)"/>
+    <!-- Main body with gradient -->
+    <rect x="-200" y="-280" width="400" height="100" rx="20" 
+          fill="url(#goldGradient)" filter="url(#innerGlow)"/>
+    <!-- Metallic shine overlay -->
+    <rect x="-190" y="-275" width="380" height="40" rx="15" 
+          fill="url(#metallicShine)"/>
+    <!-- Top highlight -->
+    <rect x="-180" y="-270" width="360" height="25" rx="12" 
+          fill="rgba(255,255,255,0.4)"/>
+    
+    <!-- T vertical bar - premium 3D layers -->
+    <!-- Deep shadow -->
+    <rect x="-50" y="-180" width="100" height="360" rx="20" 
+          fill="rgba(0,0,0,0.4)" transform="translate(8, 8)"/>
+    <!-- Main body with gradient -->
+    <rect x="-50" y="-180" width="100" height="360" rx="20" 
+          fill="url(#goldGradient)" filter="url(#innerGlow)"/>
+    <!-- Metallic shine overlay -->
+    <rect x="-45" y="-175" width="40" height="350" rx="15" 
+          fill="url(#metallicShine)"/>
+    <!-- Side highlight -->
+    <rect x="-40" y="-170" width="30" height="340" rx="12" 
+          fill="rgba(255,255,255,0.4)"/>
+    
+    <!-- Premium "IQ" with diamond/emerald spheres -->
+    <g transform="translate(260, -140)">
+      <!-- I sphere - premium 3D -->
+      <circle cx="0" cy="0" r="48" fill="url(#emeraldGradient)" filter="url(#premiumShadow)"/>
+      <circle cx="-12" cy="-12" r="20" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="0" cy="0" r="35" fill="rgba(255,255,255,0.1)"/>
+      <text x="0" y="16" font-family="Arial, sans-serif" font-size="42" font-weight="900" 
+            fill="white" text-anchor="middle" filter="url(#outerGlow)">I</text>
+      
+      <!-- Q sphere - premium 3D -->
+      <circle cx="0" cy="110" r="48" fill="url(#emeraldGradient)" filter="url(#premiumShadow)"/>
+      <circle cx="-12" cy="98" r="20" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="0" cy="110" r="35" fill="rgba(255,255,255,0.1)"/>
+      <text x="0" y="126" font-family="Arial, sans-serif" font-size="42" font-weight="900" 
+            fill="white" text-anchor="middle" filter="url(#outerGlow)">Q</text>
+      <!-- Premium Q tail -->
+      <path d="M 36 118 L 52 132" stroke="url(#emeraldGradient)" stroke-width="10" 
+            stroke-linecap="round" filter="url(#outerGlow)"/>
+      <path d="M 36 118 L 52 132" stroke="rgba(255,255,255,0.7)" stroke-width="4" 
+            stroke-linecap="round"/>
+    </g>
+    
+    <!-- Premium trading chart with 3D effect -->
+    <g transform="translate(-180, 220)" opacity="0.8">
+      <!-- Chart background with depth -->
+      <rect x="-10" y="-10" width="200" height="100" rx="10" 
+            fill="rgba(0,0,0,0.3)" filter="url(#premiumShadow)"/>
+      <rect x="-8" y="-8" width="196" height="96" rx="8" 
+            fill="rgba(30,58,138,0.4)"/>
+      <!-- Premium chart line -->
+      <path d="M 0 80 L 30 50 L 60 60 L 90 30 L 120 40 L 150 20 L 180 36" 
+            stroke="url(#goldGradient)" stroke-width="8" fill="none" stroke-linecap="round" 
+            filter="url(#outerGlow)"/>
+      <!-- Data points with glow -->
+      <circle cx="0" cy="80" r="6" fill="url(#goldGradient)" filter="url(#outerGlow)"/>
+      <circle cx="180" cy="36" r="6" fill="url(#goldGradient)" filter="url(#outerGlow)"/>
+      <!-- Chart grid lines -->
+      <line x1="0" y1="20" x2="180" y2="20" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <line x1="0" y1="50" x2="180" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    </g>
+    
+    <!-- Premium accent elements - sparkles -->
+    <g opacity="0.6">
+      <!-- Top left sparkle -->
+      <circle cx="-300" cy="-300" r="3" fill="white" filter="url(#outerGlow)"/>
+      <circle cx="-300" cy="-300" r="1" fill="url(#goldGradient)"/>
+      <!-- Top right sparkle -->
+      <circle cx="300" cy="-300" r="3" fill="white" filter="url(#outerGlow)"/>
+      <circle cx="300" cy="-300" r="1" fill="url(#emeraldGradient)"/>
+      <!-- Bottom sparkle -->
+      <circle cx="0" cy="350" r="3" fill="white" filter="url(#outerGlow)"/>
+      <circle cx="0" cy="350" r="1" fill="url(#goldGradient)"/>
+    </g>
+  </g>
+  
+  <!-- Premium outer rings with depth -->
+  <circle cx="512" cy="512" r="480" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4"/>
+  <circle cx="512" cy="512" r="470" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  <circle cx="512" cy="512" r="460" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+</svg>
+

@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TradeIQ">
+    <title>TradeIQ - AI-Powered Trade Signal Processor</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+</head>
+<body>
+    <!-- Custom Title Bar for Native App Feel -->
+    <div id="title-bar" class="title-bar">
+        <div class="title-bar-drag">
+            <span class="title-bar-text">⚡ TradeIQ</span>
+        </div>
+        <div class="title-bar-controls" id="window-controls">
+            <!-- Windows controls - hidden on macOS -->
+            <button class="title-bar-btn minimize" onclick="window.electronAPI?.windowMinimize()" title="Minimize">
+                <svg width="10" height="1" viewBox="0 0 10 1"><rect fill="currentColor" width="10" height="1"/></svg>
+            </button>
+            <button class="title-bar-btn maximize" onclick="window.electronAPI?.windowMaximize()" title="Maximize">
+                <svg width="10" height="10" viewBox="0 0 10 10"><rect fill="none" stroke="currentColor" stroke-width="1" x="0.5" y="0.5" width="9" height="9"/></svg>
+            </button>
+            <button class="title-bar-btn close" onclick="window.electronAPI?.windowClose()" title="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10"><line stroke="currentColor" stroke-width="1.2" x1="0" y1="0" x2="10" y2="10"/><line stroke="currentColor" stroke-width="1.2" x1="10" y1="0" x2="0" y2="10"/></svg>
+            </button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header style="display: block !important; visibility: visible !important;">
+            <h1>⚡ TradeIQ</h1>
+            <p class="subtitle" style="position: relative; z-index: 1;">AI-Powered Trade Signal Processing & Execution</p>
+            <div class="status-bar" style="position: relative; z-index: 1;">
+                <div class="status-item">
+                    <span class="status-label">OpenAI:</span>
+                    <span class="status-value" id="openai-status">Loading...</span>
+                </div>
+            </div>
+        </header>
+        
+        <nav class="tabs" aria-label="Primary navigation">
+            <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('executor', this)">🤖 Smart Executor</button>
+            <button class="tab-btn" onclick="switchTab('x', this)">🐦 X (Twitter)</button>
+            <div class="more-modules-dropdown">
+                <button class="tab-btn more-modules-btn" onmouseenter="showMoreModules()" onmouseleave="hideMoreModules()">☰ More</button>
+                <div class="more-modules-menu" id="more-modules-menu" onmouseenter="showMoreModules()" onmouseleave="hideMoreModules()">
+                    <button class="more-modules-item" onclick="switchTab('snaptrade', this); hideMoreModules();">🔗 SnapTrade</button>
+                    <button class="more-modules-item" onclick="switchTab('prompt-builder', this); hideMoreModules();">🏗️ Prompt Builder</button>
+                    <button class="more-modules-item" onclick="switchTab('channels', this); hideMoreModules();">📡 Channels</button>
+                    <button class="more-modules-item" onclick="switchTab('tradingview-executor', this); hideMoreModules();">📺 TradingView Executor</button>
+                    <button class="more-modules-item" onclick="switchTab('etrade', this); hideMoreModules();">📈 E*TRADE</button>
+                    <button class="more-modules-item" onclick="switchTab('discord', this); hideMoreModules();">💬 Discord Webhook</button>
+                    <button class="more-modules-item" onclick="switchTab('notifications', this); hideMoreModules();">🔔 Notifications</button>
+                    <button class="more-modules-item" onclick="switchTab('settings', this); hideMoreModules();">⚙️ Settings</button>
+                </div>
+            </div>
+        </nav>
+
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <section class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                    <h2 class="dashboard-title">📊 Dashboard - All Input Signals (Real-time)</h2>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="checkbox" id="auto-refresh-signals" checked> Auto-refresh (3s)
+                        </label>
+                        <button onclick="loadAllSignals()" class="btn btn-secondary">🔄 Manual Refresh</button>
+                        <button onclick="clearAllInputSignals()" class="btn btn-danger">🗑️ Clear All</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <label for="signal-source-filter">Filter by Source:</label>
+                    <select id="signal-source-filter" onchange="loadAllSignals()" style="width: 200px;">
+                        <option value="">All Sources</option>
+                        <option value="chrome_extension">Chrome Extension</option>
+                        <option value="api">API</option>
+                        <option value="external">External</option>
+                    </select>
+                    <button onclick="clearFilteredSignals()" class="btn btn-danger" id="clear-filtered-btn" style="display: none;">🗑️ Clear Filtered</button>
+                </div>
+                <div id="all-signals-list" class="signals-list">
+                    <p class="loading">Loading signals...</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <details class="collapse-section">
+                    <summary>
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <span style="font-weight: 600; font-size: 1.1rem;">💬 Discord Browser (Integrated)</span>
+                                <span id="discord-browser-status" class="status-badge status-disconnected" style="margin-left: 12px; font-size: 0.85rem;">Not Connected</span>
+                            </div>
+                            <button id="save-discord-session-btn" onclick="saveDiscordSession(event)" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; display: none;">💾 Save Session</button>
+                        </div>
+                    </summary>
+                    <div class="accordion-body">
+                        <p class="help-text" style="margin: 0 0 20px 0;">Built-in Discord browser with automatic notification capture - no Chrome extension needed! Your login is persisted, so you'll stay logged in.</p>
+                        
+                        <div id="discord-browser-electron-content" style="display: none;">
+                            <!-- Discord Browser Container - Embedded Webview with Zoom -->
+                            <div id="discord-container" style="width: 100%; height: calc(100vh - 250px); min-height: 450px; max-height: 800px; border: 2px solid #7289da; border-radius: 12px; overflow: hidden; background: #2f3136; position: relative; margin-bottom: 20px;">
+                                <webview id="discord-webview" 
+                                         src="about:blank"
+                                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                                         partition="persist:discord"
+                                         allowpopups="true"
+                                         webpreferences="contextIsolation=no, nodeIntegration=no, webSecurity=no, allowRunningInsecureContent=yes">
+                                </webview>
+                                <div id="discord-loading" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #2f3136; color: #b9bbbe; z-index: 10; pointer-events: none;">
+                                    <p style="font-size: 18px; margin-bottom: 10px;">💬 Loading Discord...</p>
+                                    <p style="font-size: 14px;">Please wait while Discord loads</p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-box" style="background: rgba(78, 205, 196, 0.1); border-left: 4px solid #4ecdc4; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0;"><strong>How it works:</strong></p>
+                                <ol style="margin: 10px 0 0 0; padding-left: 20px;">
+                                    <li>Discord is embedded above - log in if not already (login is saved)</li>
+                                    <li>Navigate to your trading channels</li>
+                                    <li>Notifications from Discord are automatically captured</li>
+                                    <li>Signals will appear in your Dashboard for processing</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div id="discord-browser-web-content">
+                            <!-- Shown when running in browser -->
+                            <div class="warning-box" style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0 0 10px 0;"><strong>⚠️ Electron Desktop App Required</strong></p>
+                                <p style="margin: 0 0 10px 0;">The integrated Discord browser requires the Electron desktop app. You're currently running in a web browser.</p>
+                                <p style="margin: 0;"><strong>To use the integrated Discord browser:</strong></p>
+                                <ol style="margin: 10px 0 0 0; padding-left: 20px;">
+                                    <li>Install Node.js if not already installed</li>
+                                    <li>Run <code>npm install</code> in the TradeIQ-Desktop folder</li>
+                                    <li>Run <code>npm start</code> to launch the Electron app</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="info-box" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0 0 10px 0;"><strong>Alternative: Chrome Extension</strong></p>
+                                <p style="margin: 0 0 10px 0;">If you prefer using a browser, you can use the Chrome extension:</p>
+                                <ol style="margin: 10px 0 0 0; padding-left: 20px;">
+                                    <li>Load the extension from <code>chrome-notifications-to-whatsapp</code> folder</li>
+                                    <li>Configure TradeBot URL to: <code>http://localhost:5000/api/signals/receive</code></li>
+                                    <li>Open Discord in Chrome and enable notifications</li>
+                                    <li>Notifications will be forwarded to TradeIQ</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <h3>📊 Recent Discord Signals</h3>
+                            <div id="discord-browser-signals-list" style="max-height: 400px; overflow-y: auto;">
+                                <p class="no-signals" style="color: #666; font-style: italic;">No Discord signals received yet. Open Discord and navigate to your trading channels.</p>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <section class="section">
+                <details class="collapse-section">
+                    <summary>Manual Signal Processing</summary>
+                    <div class="accordion-body">
+                        <form id="test-signal-form" onsubmit="sendTestSignal(event)">
+                            <div class="form-group">
+                                <label for="test-channel">Channel Name (Title) <span style="font-size: 0.8rem; color: #6b7280; font-weight: normal;">(optional)</span></label>
+                                <input type="text" id="test-channel" placeholder="e.g., crypto_alerts" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                            </div>
+                            <div class="form-group">
+                                <label for="test-signal">Signal Content</label>
+                                <textarea id="test-signal" rows="4" placeholder="e.g., BUY TSLA 450 C 2.00" required inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                            </div>
+                            <div class="sticky-cta">
+                                <button type="submit" class="btn btn-primary">📤 Send Test Signal</button>
+                            </div>
+                        </form>
+                        <div id="test-result" class="result-box"></div>
+                    </div>
+                </details>
+            </section>
+        </div>
+
+        <!-- Prompt Builder Tab -->
+        <div id="prompt-builder-tab" class="tab-content">
+            <section class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2>🤖 AI-Powered Conversational Prompt Builder</h2>
+                    <button onclick="showBuilderPromptInfo()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">ℹ️ What is Builder Prompt?</button>
+                </div>
+                <p class="help-text">Dump all your signals and let AI analyze them. The AI will ask clarifying questions to build the perfect prompt!</p>
+                
+                <div class="form-group">
+                    <label>Action</label>
+                    <div class="radio-group segmented-control">
+                        <label class="radio-label">
+                            <input type="radio" name="prompt-action" value="create" checked onchange="resetPromptBuilder()">
+                            <span>Create New Channel</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="prompt-action" value="update" onchange="resetPromptBuilder()">
+                            <span>Update Existing Channel</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="channel-selection" class="channel-selection">
+                    <div id="new-channel-input" class="form-group">
+                        <label for="chat-channel-name">Channel Name</label>
+                        <input type="text" id="chat-channel-name" placeholder="e.g., crypto_signals_vip" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+
+                    <div id="existing-channel-input" class="form-group" style="display: none;">
+                        <label for="chat-channel-select">Select Existing Channel</label>
+                        <select id="chat-channel-select">
+                            <option value="">Loading channels...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chat-title-filter">Title Filter (Optional)</label>
+                        <input type="text" id="chat-title-filter" placeholder="e.g., XYZ-Trade-alerts or test1 (OR) test2 (OR) test3 or keyword1 (AND) keyword2" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        <div class="help-text">This text will be matched against signal titles. If a signal's title contains this filter, it will be routed to this channel.<br><br><strong>OR Logic:</strong> Use "(OR)" to match any filter (e.g., "test1 (OR) test2 (OR) test3" matches any of these).<br><strong>AND Logic:</strong> Use "(AND)" to require all filters (e.g., "keyword1 (AND) keyword2" requires both keywords).<br><strong>Combined:</strong> You can combine both (e.g., "filter1 (AND) filter2 (OR) filter3" means (filter1 AND filter2) OR filter3).</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chat-model-provider">AI Model Provider</label>
+                        <select id="chat-model-provider" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem;">
+                            <option value="openai">OpenAI (uses models from Settings)</option>
+                            <option value="grok">Grok (uses model from Settings)</option>
+                        </select>
+                        <div class="help-text">Select which AI model to use for building prompts and processing signals for this channel. The specific model version is configured in Settings.</div>
+                    </div>
+                </div>
+
+                <!-- Chat Interface -->
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-message bot-message">
+                            <div class="message-content">
+                                <strong>AI Assistant:</strong><br>
+                                Hello! I'm here to help you build a channel-specific prompt. 
+                                <br><br>
+                                <strong>How it works:</strong><br>
+                                1. Paste ALL your trade signals below (any format, with or without dates)<br>
+                                2. I'll analyze them and ask clarifying questions if needed<br>
+                                3. Answer my questions in the chat<br>
+                                4. Once I understand the format, I'll generate the perfect parsing prompt!<br>
+                                <br>
+                                Ready? Paste your signals below! 👇
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <textarea id="chat-input" class="chat-input" rows="4" placeholder="Paste all your signals here... (they can have dates or not, any format is fine)" onkeydown="if(event.key==='Enter' && event.ctrlKey) sendChatMessage()" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                        <p class="help-text" style="margin-top: 5px; margin-bottom: 10px;">💡 Press Ctrl+Enter to send</p>
+                        <div class="chat-buttons">
+                            <button onclick="sendChatMessage()" class="btn btn-primary" id="send-button">📤 Send Signals</button>
+                            <button onclick="generateFinalPrompt()" class="btn btn-primary" id="generate-button" style="display: none;">✨ Generate Prompt</button>
+                            <button onclick="resetPromptBuilder()" class="btn btn-secondary">🔄 Start Over</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Channels Tab -->
+        <div id="channels-tab" class="tab-content">
+            <section class="section">
+                <h2>Channel Management</h2>
+                <div class="controls">
+                    <button onclick="loadChannels()" class="btn btn-secondary">🔄 Refresh</button>
+                </div>
+                <div id="channels-list" class="channels-list">
+                    <p class="loading">Loading channels...</p>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- SnapTrade Tab -->
+        <div id="snaptrade-tab" class="tab-content">
+            <section class="section">
+                <h2>🔗 Connect to SnapTrade Proxy</h2>
+                <div class="form-group">
+                    <p class="help-text">
+                        Enter the ngrok URL from your desktop SnapTrade proxy server.<br>
+                        <strong>Steps:</strong>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>On your desktop, run: <code>cd ~/Desktop/snaptrade-proxy && ./start.sh</code></li>
+                            <li>Copy the ngrok URL shown (e.g., https://xxxx.ngrok-free.dev)</li>
+                            <li>Paste it below and click "Save URL"</li>
+                        </ol>
+                    </p>
+                    <div class="form-group">
+                        <label for="snaptrade-proxy-url">Proxy URL (ngrok) <span style="color: red;">*</span></label>
+                        <input type="text" id="snaptrade-proxy-url" placeholder="https://xxxx.ngrok-free.dev" inputmode="url" autocomplete="url" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <button class="btn btn-secondary" onclick="snaptradeSaveProxyUrl()">💾 Save URL</button>
+                    <div id="snaptrade-proxy-status" class="status-box" style="margin-top: 10px;">
+                        <p>Not configured</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="snaptrade-accounts-section" style="display:none;">
+                <h2>💼 Accounts</h2>
+                <button class="btn btn-secondary" onclick="snaptradeLoadAccounts()">🔄 Refresh Accounts</button>
+                <div id="snaptrade-accounts-list" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="snaptrade-positions-section" style="display:none;">
+                <h2>📊 Positions</h2>
+                <div class="form-group">
+                    <label for="snaptrade-positions-account">Select Account:</label>
+                    <select id="snaptrade-positions-account" onchange="snaptradeLoadPositions()"></select>
+                </div>
+                <button class="btn btn-secondary" onclick="snaptradeLoadPositions()">🔄 Refresh Positions</button>
+                <div id="snaptrade-positions-list" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="snaptrade-orders-section" style="display:none;">
+                <h2>📝 Recent Orders</h2>
+                <div class="form-group">
+                    <label for="snaptrade-orders-account">Select Account (optional):</label>
+                    <select id="snaptrade-orders-account">
+                        <option value="">All Accounts</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="snaptradeLoadOrders()">🔄 Refresh Orders</button>
+                <div id="snaptrade-orders-list" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="snaptrade-options-chain-section" style="display:none;">
+                <h2>📊 Options Chain</h2>
+                <div class="form-group">
+                    <label for="snaptrade-options-chain-symbol">Symbol:</label>
+                    <input type="text" id="snaptrade-options-chain-symbol" placeholder="e.g., TSLA" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                </div>
+                <div class="form-group">
+                    <label for="snaptrade-options-chain-expiry">Expiry Date (optional):</label>
+                    <input type="date" id="snaptrade-options-chain-expiry" placeholder="YYYY-MM-DD">
+                    <small style="color: #6b7280; display: block; margin-top: 5px;">Leave empty to show all expiration dates</small>
+                </div>
+                <div class="form-group">
+                    <label for="snaptrade-options-chain-account">Account (optional):</label>
+                    <select id="snaptrade-options-chain-account">
+                        <option value="">Use Default Account</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="snaptradeLoadOptionsChain()">🔍 Get Options Chain</button>
+                <div id="snaptrade-options-chain-result" style="margin-top: 20px;"></div>
+            </section>
+
+            <section class="section" id="snaptrade-trade-section" style="display:none;">
+                <h2>📈 Place Trade</h2>
+                <div class="form-group">
+                    <label for="snaptrade-trade-type">Trade Type:</label>
+                    <select id="snaptrade-trade-type" onchange="snaptradeToggleTradeType()">
+                        <option value="equity">Equity</option>
+                        <option value="option">Options</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="snaptrade-trade-account">Account (optional):</label>
+                    <select id="snaptrade-trade-account">
+                        <option value="">Use Last Account</option>
+                    </select>
+                </div>
+                
+                <div id="snaptrade-equity-trade-form">
+                    <div class="form-group">
+                        <label for="snaptrade-equity-symbol">Symbol:</label>
+                        <input type="text" id="snaptrade-equity-symbol" placeholder="e.g., TSLA" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-equity-action">Action:</label>
+                        <select id="snaptrade-equity-action">
+                            <option value="BUY">Buy</option>
+                            <option value="SELL">Sell</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-equity-quantity">Quantity:</label>
+                        <input type="number" id="snaptrade-equity-quantity" value="1" min="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-equity-order-type">Order Type:</label>
+                        <select id="snaptrade-equity-order-type" onchange="snaptradeToggleEquityPrice()">
+                            <option value="Market">Market</option>
+                            <option value="Limit">Limit</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="snaptrade-equity-price-group" style="display:none;">
+                        <label for="snaptrade-equity-price">Limit Price:</label>
+                        <input type="number" step="0.01" id="snaptrade-equity-price" placeholder="e.g., 250.00" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-equity-time-in-force">Time in Force:</label>
+                        <select id="snaptrade-equity-time-in-force">
+                            <option value="DAY">Day</option>
+                            <option value="GTC">Good Til Canceled (GTC)</option>
+                            <option value="FOK">Fill or Kill (FOK)</option>
+                            <option value="IOC">Immediate or Cancel (IOC)</option>
+                            <option value="GTD">Good Til Date (GTD)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="snaptrade-option-trade-form" style="display:none;">
+                    <div class="form-group">
+                        <label for="snaptrade-option-symbol">Symbol:</label>
+                        <input type="text" id="snaptrade-option-symbol" placeholder="e.g., TSLA" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-strike">Strike:</label>
+                        <input type="number" step="0.01" id="snaptrade-option-strike" placeholder="e.g., 450" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-expiry">Expiry (YYYY-MM-DD):</label>
+                        <input type="text" id="snaptrade-option-expiry" placeholder="2026-01-09" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-type">Option Type:</label>
+                        <select id="snaptrade-option-type">
+                            <option value="CALL">Call</option>
+                            <option value="PUT">Put</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-action">Action:</label>
+                        <select id="snaptrade-option-action">
+                            <option value="BUY">Buy</option>
+                            <option value="SELL">Sell</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-contracts">Contracts:</label>
+                        <input type="number" id="snaptrade-option-contracts" value="1" min="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-order-type">Order Type:</label>
+                        <select id="snaptrade-option-order-type" onchange="snaptradeToggleOptionPrice()">
+                            <option value="Market">Market</option>
+                            <option value="Limit">Limit</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="snaptrade-option-price-group" style="display:none;">
+                        <label for="snaptrade-option-price">Limit Price:</label>
+                        <input type="number" step="0.01" id="snaptrade-option-price" placeholder="e.g., 0.30" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="snaptrade-option-time-in-force">Time in Force:</label>
+                        <select id="snaptrade-option-time-in-force">
+                            <option value="GTC">Good Til Canceled (GTC)</option>
+                            <option value="DAY">Day</option>
+                            <option value="FOK">Fill or Kill (FOK)</option>
+                            <option value="IOC">Immediate or Cancel (IOC)</option>
+                            <option value="GTD">Good Til Date (GTD)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="snaptradePlaceTrade()">✅ Place Trade</button>
+                <div id="snaptrade-trade-result" style="margin-top: 10px;"></div>
+            </section>
+        </div>
+
+        <!-- E*TRADE Tab -->
+        <div id="etrade-tab" class="tab-content">
+            <section class="section">
+                <h2>🔐 Connect to E*TRADE</h2>
+                <div class="form-grid">
+                    <div>
+                        <h3>Sandbox Keys</h3>
+                        <div class="form-group">
+                            <label for="etrade-sandbox-consumer-key">Consumer Key</label>
+                            <input type="text" id="etrade-sandbox-consumer-key" placeholder="Enter sandbox consumer key" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        </div>
+                        <div class="form-group">
+                            <label for="etrade-sandbox-consumer-secret">Consumer Secret</label>
+                            <input type="password" id="etrade-sandbox-consumer-secret" placeholder="Enter sandbox consumer secret" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        </div>
+                        <p class="help-text" id="etrade-sandbox-status">Not set</p>
+                        <button class="btn btn-secondary" onclick="etradeTestKeys(true)">🧪 Test Sandbox Keys</button>
+                        <div id="etrade-sandbox-test-result" style="margin-top: 8px; min-height: 20px;"></div>
+                    </div>
+                    <div>
+                        <h3>Production Keys</h3>
+                        <div class="form-group">
+                            <label for="etrade-prod-consumer-key">Consumer Key</label>
+                            <input type="text" id="etrade-prod-consumer-key" placeholder="Enter prod consumer key" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        </div>
+                        <div class="form-group">
+                            <label for="etrade-prod-consumer-secret">Consumer Secret</label>
+                            <input type="password" id="etrade-prod-consumer-secret" placeholder="Enter prod consumer secret" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        </div>
+                        <p class="help-text" id="etrade-prod-status">Not set</p>
+                        <button class="btn btn-secondary" onclick="etradeTestKeys(false)">🧪 Test Prod Keys</button>
+                        <div id="etrade-prod-test-result" style="margin-top: 8px; min-height: 20px;"></div>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="etrade-sandbox-toggle">Active Environment</label>
+                    <select id="etrade-sandbox-toggle">
+                        <option value="true">Sandbox</option>
+                        <option value="false">Production</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="etradeSaveConfig()">💾 Save Config</button>
+                <div id="etrade-auth-status" class="status-box">
+                    <p>Checking connection...</p>
+                </div>
+                <div id="etrade-oauth" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="etradeStartOAuth()">🔗 Get Authorization URL</button>
+                    <div id="etrade-auth-url" style="margin-top: 10px;"></div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="etrade-verifier">Verification Code</label>
+                        <input type="text" id="etrade-verifier" placeholder="Enter code from E*TRADE" inputmode="numeric" autocomplete="one-time-code" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="etradeCompleteOAuth()">✅ Complete OAuth</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="etrade-accounts-section" style="display:none;">
+                <h2>📋 Accounts</h2>
+                <button class="btn btn-secondary" onclick="etradeLoadAccounts()">🔄 Refresh Accounts</button>
+                <div id="etrade-accounts-list" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="etrade-balance-section" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">💰 Balance</h2>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="etrade-balance-countdown" style="font-size: 0.85rem; color: #6b7280; font-weight: 500;"></span>
+                        <button class="btn btn-secondary" onclick="etradeLoadBalance(true)" title="Refresh balance data">🔄 Refresh</button>
+                        <button class="btn btn-secondary" id="etrade-balance-auto-refresh-btn" onclick="toggleBalanceAutoRefresh()" title="Toggle auto-refresh">▶️ Auto-Refresh</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Institution Type</label>
+                    <select id="etrade-inst-type">
+                        <option value="BROKERAGE">BROKERAGE</option>
+                        <option value="BANK">BANK</option>
+                    </select>
+                </div>
+                <div id="etrade-balance-details" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="etrade-portfolio-section" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📈 Portfolio</h2>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="etrade-portfolio-countdown" style="font-size: 0.85rem; color: #6b7280; font-weight: 500;"></span>
+                        <button class="btn btn-secondary" onclick="etradeLoadPortfolio(true)" title="Refresh portfolio data">🔄 Refresh</button>
+                        <button class="btn btn-secondary" id="etrade-portfolio-auto-refresh-btn" onclick="togglePortfolioAutoRefresh()" title="Toggle auto-refresh">▶️ Auto-Refresh</button>
+                    </div>
+                </div>
+                <div id="etrade-portfolio-list" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="etrade-orders-section" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📝 Orders</h2>
+                    <button class="btn btn-secondary" onclick="etradeLoadOrders()" title="Refresh orders">🔄 Refresh</button>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="etrade-order-status">
+                        <option value="OPEN">OPEN</option>
+                        <option value="EXECUTED">EXECUTED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                        <option value="REJECTED">REJECTED</option>
+                        <option value="EXPIRED">EXPIRED</option>
+                        <option value="ALL">ALL</option>
+                    </select>
+                </div>
+                <div id="etrade-orders-list" style="margin-top: 10px;"></div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Cancel Order ID</label>
+                    <input type="text" id="etrade-cancel-id" placeholder="Order ID" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    <button class="btn btn-danger" style="margin-top: 6px;" onclick="etradeCancelOrder()">❌ Cancel Order</button>
+                </div>
+            </section>
+
+            <section class="section" id="etrade-order-status-section" style="display:none;">
+                <h2>🔍 Order Status Lookup</h2>
+                <p class="help-text">Enter an Order ID to view its current status and details.</p>
+                <div class="form-group">
+                    <label>Order ID <span style="color: red;">*</span></label>
+                    <input type="text" id="etrade-lookup-order-id" placeholder="e.g., 48" style="font-family: monospace;" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                </div>
+                <button class="btn btn-primary" onclick="etradeLookupOrderStatus()">🔍 Lookup Order Status</button>
+                <div id="etrade-order-status-result" style="margin-top: 15px;"></div>
+            </section>
+
+            <section class="section" id="etrade-trade-section" style="display:none;">
+                <h2>📄 Order XML (Preview/Place)</h2>
+                <p class="help-text">Paste XML payload for preview/place (matches E*TRADE API XML format).</p>
+                <textarea id="etrade-order-xml" rows="8" placeholder="&lt;PreviewOrderRequest&gt;..." inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="etradePreviewOrder()">👁️ Preview Order</button>
+                    <button class="btn btn-primary" style="margin-left: 8px;" onclick="etradePlaceOrder()">✅ Place Order</button>
+                </div>
+                <div id="etrade-order-result" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="etrade-options-chain-section">
+                <h2>🧮 Options Chain</h2>
+                <p class="help-text">💡 <strong>Tip:</strong> To get multiple strikes, fill in both "Strike Near" (e.g., current stock price) and "Strikes Count" (e.g., 10). The API will return strikes centered around your "Strike Near" value.</p>
+                
+                <!-- Expiration Dates Lookup -->
+                <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; margin-bottom: 16px; border: 1px solid #b3d9ff;">
+                    <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1rem;">📅 Get Available Expiration Dates</h3>
+                    <div style="display: flex; gap: 8px; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label style="font-size: 0.9rem;">Symbol</label>
+                            <input type="text" id="etrade-exp-dates-symbol" placeholder="AAPL" style="width: 100%;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                        </div>
+                        <button class="btn btn-secondary" onclick="etradeGetExpirationDates()" style="white-space: nowrap;">🔍 Get Dates</button>
+                    </div>
+                    <div id="etrade-expiration-dates-result" style="margin-top: 12px;"></div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Symbol <span style="color: red;">*</span></label>
+                        <input type="text" id="etrade-opt-symbol" placeholder="SPY" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry (YYYY-MM-DD) <span style="color: red;">*</span></label>
+                        <input type="text" id="etrade-opt-expiry" placeholder="2025-01-17" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label>Strike Near (e.g., 500)</label>
+                        <input type="number" step="0.01" id="etrade-opt-strike-near" placeholder="Required for multiple strikes" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Strikes (e.g., 10)</label>
+                        <input type="number" id="etrade-opt-strike-count" placeholder="Works with Strike Near" min="1" max="50" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Include Weekly</label>
+                        <select id="etrade-opt-include-weekly">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="etradeLoadOptionChain()">🔄 Load Options Chain</button>
+                <div id="etrade-options-chain" style="margin-top: 12px;"></div>
+            </section>
+
+            <section class="section" id="etrade-options-order-section">
+                <h2>🛒 Options Order (Single-Leg)</h2>
+                <p class="help-text">Use the <strong>osiKey</strong> from the options chain response (format: SYMBOL--YYMMDD[C/P]STRIKE, e.g., AAPL--251212C00280000).</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Option Symbol (osiKey)</label>
+                        <input type="text" id="etrade-opt-order-symbol" placeholder="e.g., AAPL--251212C00280000" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label>Action</label>
+                        <select id="etrade-opt-order-action">
+                            <option value="BUY_OPEN">BUY_OPEN</option>
+                            <option value="SELL_OPEN">SELL_OPEN</option>
+                            <option value="BUY_CLOSE">BUY_CLOSE</option>
+                            <option value="SELL_CLOSE">SELL_CLOSE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price Type</label>
+                        <select id="etrade-opt-price-type">
+                            <option value="MARKET">MARKET</option>
+                            <option value="LIMIT">LIMIT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Limit Price (if LIMIT)</label>
+                        <input type="text" id="etrade-opt-limit-price" placeholder="e.g., 1.25" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Order Term</label>
+                        <select id="etrade-opt-order-term">
+                            <option value="GOOD_FOR_DAY">GOOD_FOR_DAY</option>
+                            <option value="IMMEDIATE_OR_CANCEL">IMMEDIATE_OR_CANCEL</option>
+                            <option value="FILL_OR_KILL">FILL_OR_KILL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="etrade-opt-quantity" value="1" min="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="etradePreviewOptionsOrder()">👁️ Preview Options Order</button>
+                    <button class="btn btn-primary" style="margin-left: 8px;" onclick="etradePlaceOptionsOrder()">✅ Place Options Order</button>
+                </div>
+                <div id="etrade-options-order-result" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="etrade-equity-order-section" style="display:none;">
+                <h2>📈 Equity Order (Stocks)</h2>
+                <p class="help-text">Buy or sell stocks (equity) using E*TRADE API.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Symbol <span style="color: red;">*</span></label>
+                        <input type="text" id="etrade-equity-symbol" placeholder="e.g., AAPL" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label>Action <span style="color: red;">*</span></label>
+                        <select id="etrade-equity-action">
+                            <option value="BUY">BUY</option>
+                            <option value="SELL">SELL</option>
+                            <option value="BUY_TO_COVER">BUY_TO_COVER</option>
+                            <option value="SELL_SHORT">SELL_SHORT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price Type <span style="color: red;">*</span></label>
+                        <select id="etrade-equity-price-type">
+                            <option value="MARKET">MARKET</option>
+                            <option value="LIMIT">LIMIT</option>
+                            <option value="STOP">STOP</option>
+                            <option value="STOP_LIMIT">STOP_LIMIT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Limit Price (if LIMIT or STOP_LIMIT)</label>
+                        <input type="number" step="0.01" id="etrade-equity-limit-price" placeholder="e.g., 150.50" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Stop Price (if STOP or STOP_LIMIT)</label>
+                        <input type="number" step="0.01" id="etrade-equity-stop-price" placeholder="e.g., 145.00" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity <span style="color: red;">*</span></label>
+                        <input type="number" id="etrade-equity-quantity" value="1" min="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Order Term</label>
+                        <select id="etrade-equity-order-term">
+                            <option value="GOOD_FOR_DAY">GOOD_FOR_DAY</option>
+                            <option value="GOOD_UNTIL_CANCEL">GOOD_UNTIL_CANCEL</option>
+                            <option value="IMMEDIATE_OR_CANCEL">IMMEDIATE_OR_CANCEL</option>
+                            <option value="FILL_OR_KILL">FILL_OR_KILL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Market Session</label>
+                        <select id="etrade-equity-market-session">
+                            <option value="REGULAR">REGULAR</option>
+                            <option value="EXTENDED">EXTENDED</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>All or None</label>
+                        <select id="etrade-equity-all-or-none">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-success" onclick="etradePreviewAndPlaceEquityOrder()" style="background: #059669; color: white; padding: 12px 24px; font-weight: bold;">⚡ Preview & Place Order</button>
+                    <button class="btn btn-secondary" onclick="etradePreviewEquityOrder()" style="margin-left: 8px;">👁️ Preview Only</button>
+                    <button class="btn btn-primary" style="margin-left: 8px;" onclick="etradePlaceEquityOrder()">✅ Place Only</button>
+                </div>
+                <div id="etrade-equity-order-result" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="etrade-quote-section" style="display:none;">
+                <h2>📊 Quote</h2>
+                <div class="form-group">
+                    <label>Symbol</label>
+                    <input type="text" id="etrade-quote-symbol" placeholder="AAPL" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                </div>
+                <button class="btn btn-secondary" onclick="etradeGetQuote()">🔍 Get Quote</button>
+                <div id="etrade-quote-details" style="margin-top: 10px;"></div>
+            </section>
+        </div>
+
+        <!-- Discord Tab -->
+        <div id="discord-tab" class="tab-content">
+            <section class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="margin: 0;">💬 Discord Integration</h2>
+                        <p class="help-text" style="margin: 5px 0 0 0;">Configure your Discord bot to send messages to a channel in your server.</p>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <span id="discord-status" style="font-weight: bold; padding: 8px 16px; border-radius: 6px; background: #d1fae5; color: #065f46;">✅ Enabled</span>
+                            <input type="checkbox" id="discord-enabled" checked onchange="discordToggleEnabled()" style="width: 24px; height: 24px; cursor: pointer;">
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="discord-message" class="result-box" style="display: none;"></div>
+                
+                <h3>Configuration</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="discord-bot-token">Bot Token <span style="color: red;">*</span></label>
+                        <input type="password" id="discord-bot-token" placeholder="Enter your Discord bot token" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        <p class="help-text">Get this from Discord Developer Portal → Your Application → Bot → Token</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="discord-channel-id">Channel ID <span style="color: red;">*</span></label>
+                        <input type="text" id="discord-channel-id" placeholder="Enter Discord channel ID" style="font-family: monospace;" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        <p class="help-text">Right-click the channel → Copy Channel ID (Developer Mode must be enabled)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="discord-channel-management-channel-id">Channel Management Channel ID (Optional)</label>
+                        <input type="text" id="discord-channel-management-channel-id" placeholder="Enter Discord channel ID for channel management signals" style="font-family: monospace;" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        <p class="help-text">Optional: Separate Discord channel for channel management signals. If not set, uses the default channel above.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="discord-commentary-channel-id">Commentary Channel ID (Optional)</label>
+                        <input type="text" id="discord-commentary-channel-id" placeholder="Enter Discord channel ID for commentary signals" style="font-family: monospace;" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                        <p class="help-text">Optional: Separate Discord channel for commentary signals (signals with "commentary" in the title). If not set, uses the default channel above.</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="discordSaveConfig()">💾 Save Configuration</button>
+                    <button class="btn btn-secondary" onclick="discordLoadConfig()">🔄 Reload</button>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 15px; background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 4px;">
+                    <h4 style="margin-top: 0;">📝 How to Get Your Credentials</h4>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>Bot Token:</strong> Go to <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a> → Your Application → Bot → Copy Token</li>
+                        <li><strong>Channel ID:</strong> Enable Developer Mode in Discord (User Settings → Advanced) → Right-click your channel → Copy Channel ID</li>
+                        <li>Make sure your bot is invited to your server with "Send Messages" permission</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <section class="section">
+                <h2>🧪 Test Message</h2>
+                <p class="help-text">Send a test message to verify your Discord integration is working.</p>
+                
+                <div class="form-group">
+                    <label for="discord-test-message">Test Message</label>
+                    <input type="text" id="discord-test-message" placeholder="Enter test message (optional)" value="🧪 Test message from TradeIQ!" inputmode="text" autocomplete="off" autocapitalize="sentences" autocorrect="on">
+                </div>
+                
+                <div class="form-group">
+                    <label for="discord-test-channel-id">Send to Channel ID (Optional)</label>
+                    <input type="text" id="discord-test-channel-id" placeholder="Leave empty to use default channel" style="font-family: monospace;" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    <p class="help-text">Optional: Specify a channel ID to test. If empty, uses the default channel ID configured above.</p>
+                </div>
+                
+                <button class="btn btn-primary" onclick="discordSendTestMessage()">📤 Send Test Message</button>
+                <div id="discord-test-result" style="margin-top: 15px;"></div>
+            </section>
+            
+            <section class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="margin: 0;">🐦 X Channel Signals (Real-time)</h2>
+                        <p class="help-text" style="margin: 5px 0 0 0;">Signals from X-related bots (flow-bot, uwhale-news-bot, x-news-bot) appear here in real-time.</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="checkbox" id="discord-x-signals-autorefresh" checked> Auto-refresh (3s)
+                        </label>
+                        <button onclick="discordLoadXSignals()" class="btn btn-secondary">🔄 Refresh</button>
+                        <button onclick="discordClearXSignals()" class="btn btn-danger">🗑️ Clear</button>
+                    </div>
+                </div>
+                
+                <div id="discord-x-signals-container" style="max-height: 600px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #f9f9f9;">
+                    <div id="discord-x-signals-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="color: #666; text-align: center; padding: 20px;">Loading X channel signals...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- X (Twitter) Tab -->
+        <div id="x-tab" class="tab-content">
+            <!-- Analytics Dashboard -->
+            <section class="section">
+                <h2 class="x-dashboard-title">📊 Signal Analytics Dashboard</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;" id="x-analytics-grid">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+                        <div style="font-size: 0.9em; opacity: 0.9;">📊 Today's Signals</div>
+                        <div style="font-size: 2em; font-weight: bold; margin: 10px 0;" id="x-analytics-signals">0</div>
+                        <div style="font-size: 0.8em; opacity: 0.8;" id="x-analytics-signals-trend">Loading...</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+                        <div style="font-size: 0.9em; opacity: 0.9;">🐦 Posted Tweets</div>
+                        <div style="font-size: 2em; font-weight: bold; margin: 10px 0;" id="x-analytics-posted">0</div>
+                        <div style="font-size: 0.8em; opacity: 0.8;" id="x-analytics-posted-trend">0% conversion</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Signal Feed Section -->
+            <section class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;" class="x-feed-title">📥 Live Signal Feed</h2>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="checkbox" id="x-signals-autorefresh" checked> Auto-refresh (3s)
+                        </label>
+                        <button onclick="xLoadSignals()" class="btn btn-secondary">🔄 Refresh</button>
+                        <button onclick="xClearSignals()" class="btn btn-danger">🗑️ Clear</button>
+                    </div>
+                </div>
+                
+                <!-- Filter Bar -->
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;" class="x-filter-bar">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;" class="x-filter-row">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">Filter by Score:</label>
+                            <select id="x-filter-score" onchange="xApplyFilters()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="all" selected>All Scores</option>
+                                <option value="0.9">Excellent (0.9+) ⭐⭐⭐⭐⭐</option>
+                                <option value="0.7">Very Good (0.7+) ⭐⭐⭐⭐</option>
+                                <option value="0.5">Good (0.5+) ⭐⭐⭐</option>
+                                <option value="0.3">Fair (0.3+) ⭐⭐</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">Bot Type:</label>
+                            <select id="x-filter-bot" onchange="xApplyFilters()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="all">All Bots</option>
+                                <option value="uwhale-news-bot">UWhale News</option>
+                                <option value="x-news-bot">X News</option>
+                                <option value="flow-bot">Flow Bot</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">Status:</label>
+                            <select id="x-filter-status" onchange="xApplyFilters()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="all">All</option>
+                                <option value="pending">Pending Analysis</option>
+                                <option value="analyzed">Analyzed</option>
+                                <option value="posted">Posted</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">Search Ticker:</label>
+                            <input type="text" id="x-filter-ticker" onkeyup="xApplyFilters()" placeholder="e.g., TSLA" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Signal Cards Container -->
+                <div id="x-signals-container" style="min-height: 400px;">
+                    <div id="x-signals-list" style="display: flex; flex-direction: column; gap: 15px;">
+                        <p style="color: #666; text-align: center; padding: 40px;">Loading signals...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notifications-tab" class="tab-content">
+            <section class="section">
+                <h2>🔔 Push Notifications</h2>
+                <p class="help-text">Enable push notifications to receive alerts on your device (iOS 16.4+ and Android supported).</p>
+                
+                <div class="form-group">
+                    <label>PWA Installation Status:</label>
+                    <div class="setting-value">
+                        <strong>Status:</strong> <span id="pwa-install-status">Checking...</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notification Permission:</label>
+                    <div class="setting-value">
+                        <strong>Status:</strong> <span id="notification-permission-status">Checking...</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Subscription Status:</label>
+                    <div class="setting-value">
+                        <strong>Status:</strong> <span id="subscription-status">Checking...</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToNotifications()">🔔 Subscribe to Notifications</button>
+                    <button class="btn btn-secondary" id="unsubscribe-btn" onclick="unsubscribeFromNotifications()" style="display: none;">❌ Unsubscribe</button>
+                </div>
+
+                <div id="notification-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+
+                <div style="margin-top: 30px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                    <h3 style="margin-top: 0;">📱 How to Install on iPhone (iOS 16.4+)</h3>
+                    <ol class="help-list">
+                        <li><strong>Open in Safari:</strong> Make sure you're using Safari browser (not Chrome)</li>
+                        <li><strong>Add to Home Screen:</strong> Tap the Share button (📤) → "Add to Home Screen" → "Add"</li>
+                        <li><strong>Open from Home Screen:</strong> Tap the TradeIQ icon on your home screen (NOT from Safari)</li>
+                        <li><strong>Subscribe:</strong> Come back to this tab and click "Subscribe to Notifications"</li>
+                        <li><strong>Allow Permission:</strong> When prompted, tap "Allow"</li>
+                    </ol>
+                    <p style="margin-bottom: 0;"><strong>⚠️ Important:</strong> Push notifications only work when the app is installed as a PWA and opened from the home screen icon. They will NOT work if opened directly in Safari.</p>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 4px;">
+                    <h3 style="margin-top: 0;">✅ Test Notification</h3>
+                    <p>Send yourself a test notification to verify everything is working:</p>
+                    <button class="btn btn-success" onclick="sendTestNotification()">📤 Send Test Notification</button>
+                </div>
+
+                <!-- Android Native Notifications Section -->
+                <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-left: 4px solid #0284c7; border-radius: 8px;">
+                    <h3 style="margin-top: 0; color: #0284c7;">🤖 Android Native Notifications</h3>
+                    <p style="margin-bottom: 15px;">Enable native Android notifications that work directly on your phone without PWA installation.</p>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="android-notifications-enabled" onchange="toggleAndroidNotifications()" style="width: 20px; height: 20px; cursor: pointer;">
+                            <span style="font-weight: 600;">Enable Android Notifications</span>
+                        </label>
+                        <p class="help-text" style="margin-top: 5px;">When enabled, you'll receive native Android notifications for trade signals and alerts.</p>
+                    </div>
+
+                    <div id="android-notifications-status" style="margin-bottom: 15px; padding: 10px; background: #e0f2fe; border-radius: 4px;">
+                        <strong>Status:</strong> <span id="android-notifications-status-text">Checking...</span>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="sendAndroidTestNotification()" id="android-test-btn" style="width: 100%;">
+                            📤 Send Test Android Notification
+                        </button>
+                    </div>
+
+                    <div id="android-notification-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 15px; background: #e0e7ff; border-left: 4px solid #4c77ec; border-radius: 4px;">
+                    <h3 style="margin-top: 0;">🔐 VAPID Keys Configuration</h3>
+                    <p>VAPID keys are required for push notifications. Generate new keys or use existing ones.</p>
+                    
+                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="generateVapidKeys()">🔑 Generate New VAPID Keys</button>
+                        <button class="btn btn-secondary" onclick="loadVapidKeys()">📥 Load Existing Keys</button>
+                        <button class="btn btn-success" onclick="testVapidKeys()">🧪 Test VAPID Keys</button>
+                    </div>
+
+                    <form id="vapid-keys-form" onsubmit="saveVapidKeys(event)" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label for="vapid-private-key">Private Key (PEM format)</label>
+                            <textarea id="vapid-private-key" rows="6" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----" style="width: 100%; font-family: monospace; font-size: 0.9em;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                            <p class="help-text">Keep this secret! Never share or commit to git.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vapid-public-key">Public Key (PEM format)</label>
+                            <textarea id="vapid-public-key" rows="6" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----" style="width: 100%; font-family: monospace; font-size: 0.9em;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                            <p class="help-text">This key is safe to share. Used by browsers for subscription.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vapid-email">Email (for VAPID claims)</label>
+                            <input type="email" id="vapid-email" placeholder="mailto:your-email@example.com" style="width: 100%;" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false">
+                            <p class="help-text">Must start with "mailto:" (e.g., mailto:tradeiq@example.com)</p>
+                        </div>
+
+                        <div class="sticky-cta">
+                            <button type="submit" class="btn btn-primary">💾 Save VAPID Keys</button>
+                        </div>
+                    </form>
+
+                    <div id="vapid-keys-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+
+                    <div id="vapid-keys-status" style="margin-top: 15px; padding: 10px; background: #f3f4f6; border-radius: 4px; display: none;">
+                        <strong>Current Status:</strong> <span id="vapid-status-text">Checking...</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <section class="section">
+                <h2>Configuration</h2>
+                
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <h3>🔑 OpenAI Configuration</h3>
+                        <form id="config-form" onsubmit="updateConfig(event)">
+                            <div class="form-group">
+                                <label for="config-api-key">API Key</label>
+                                <input type="password" id="config-api-key" placeholder="sk-..." inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Your OpenAI API key (kept secure, not logged)</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="config-execution-model">Execution Model</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="config-execution-model" placeholder="e.g., gpt-4-turbo-preview" style="flex: 1;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                    <button type="button" onclick="testModel('execution', this)" class="btn btn-secondary" style="white-space: nowrap;">🧪 Test</button>
+                                </div>
+                                <p class="help-text">Model used for processing trade signals. Common: gpt-4-turbo-preview, gpt-4, gpt-3.5-turbo, gpt-4o, gpt-4o-mini</p>
+                                <div id="execution-test-result" class="test-result"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="config-builder-model">Builder Model</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="config-builder-model" placeholder="e.g., gpt-4-turbo-preview" style="flex: 1;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                    <button type="button" onclick="testModel('builder', this)" class="btn btn-secondary" style="white-space: nowrap;">🧪 Test</button>
+                                </div>
+                                <p class="help-text">Model used for building channel prompts. Common: gpt-4-turbo-preview, gpt-4, gpt-3.5-turbo, gpt-4o, gpt-4o-mini</p>
+                                <div id="builder-test-result" class="test-result"></div>
+                            </div>
+
+                            <div class="sticky-cta">
+                                <button type="submit" class="btn btn-primary">💾 Save Configuration</button>
+                            </div>
+                        </form>
+
+                        <div id="config-result" class="result-box"></div>
+                    </div>
+
+                    <div class="setting-item">
+                        <h3>📈 Trading Mode</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="paper-trading-toggle" onchange="togglePaperTrading()">
+                                <span>Enable Paper Trading (Safe Mode)</span>
+                            </label>
+                            <p class="help-text">When enabled, trades are simulated and not executed live</p>
+                        </div>
+
+                        <div class="setting-value" style="margin-top: 20px;">
+                            <strong>Current Mode:</strong> <span id="current-trading-mode">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <h3>🌐 Webhook URL Configuration</h3>
+                        <p class="help-text">Configure the public URL for receiving webhooks from TradingView and other services</p>
+                        
+                        <div style="padding: 15px; background: #fef3c7; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f59e0b;">
+                            <strong>📱 Android Note:</strong> Running ngrok directly on Android is not supported due to security restrictions. 
+                            Use one of these alternatives:
+                            <ul style="margin: 10px 0 0 20px; padding: 0;">
+                                <li>Run <code>ngrok http 5000</code> on a computer and enter the URL below</li>
+                                <li>Use a cloud-based tunneling service</li>
+                                <li>Use a VPS with a public IP</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="webhook-url">Public Webhook URL</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="webhook-url" placeholder="https://your-tunnel.ngrok.io" style="flex: 1;" inputmode="url" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <button type="button" onclick="saveWebhookUrl()" class="btn btn-primary" style="white-space: nowrap;">💾 Save</button>
+                            </div>
+                            <p class="help-text">Enter the public URL from your tunneling service (e.g., ngrok running on another device)</p>
+                        </div>
+
+                        <div id="webhook-url-display" style="margin-top: 15px; padding: 15px; background: #e0f2fe; border-radius: 8px; border: 2px solid #0284c7;">
+                            <strong>Your Webhook Endpoint:</strong>
+                            <div style="display: flex; gap: 10px; margin-top: 8px; align-items: center;">
+                                <code id="full-webhook-url" style="flex: 1; padding: 8px; background: white; border-radius: 4px; font-size: 14px;">Not configured</code>
+                                <button onclick="copyWebhookUrl()" class="btn btn-secondary" style="white-space: nowrap;">📋 Copy</button>
+                            </div>
+                            <p class="help-text" style="margin-top: 10px; margin-bottom: 0;">Use this URL in TradingView alerts webhook field</p>
+                        </div>
+
+                        <div id="webhook-result" class="result-box"></div>
+                    </div>
+
+                    <details class="collapse-section">
+                        <summary>📡 API Endpoints</summary>
+                        <div class="accordion-body">
+                            <div class="setting-value">
+                                <strong>Signal Reception:</strong> <code>POST /api/signal</code>
+                            </div>
+                            <div class="setting-value">
+                                <strong>Conversational Builder:</strong> <code>POST /api/prompt-builder/start</code>
+                            </div>
+                            <div class="setting-value">
+                                <strong>Continue Conversation:</strong> <code>POST /api/prompt-builder/continue</code>
+                            </div>
+                            <p class="help-text">Use these endpoints to integrate with external systems</p>
+                        </div>
+                    </details>
+
+                    <details class="collapse-section">
+                        <summary>ℹ️ System Status</summary>
+                        <div class="accordion-body">
+                            <div class="setting-value">
+                                <strong>OpenAI Status:</strong> <span id="settings-openai-status">Loading...</span>
+                            </div>
+                            <div class="setting-value">
+                                <strong>Current API Key:</strong> <span id="settings-api-key-preview">Not configured</span>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="setting-item">
+                        <h3>🐦 X (Twitter) API Configuration</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                    <span id="x-status" style="font-weight: bold; padding: 8px 16px; border-radius: 6px; background: #d1fae5; color: #065f46;">✅ Enabled</span>
+                                    <input type="checkbox" id="x-enabled" checked onchange="xToggleEnabled()" style="width: 24px; height: 24px; cursor: pointer;">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="x-message" class="result-box" style="display: none;"></div>
+                        
+                        <p class="help-text" style="margin-bottom: 15px;">Get your credentials from <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank">Twitter Developer Portal</a></p>
+                    
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="x-api-key">API Key <span style="color: red;">*</span></label>
+                                <input type="password" id="x-api-key" placeholder="Enter your X API Key" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Consumer Key from Twitter Developer Portal</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-api-secret">API Secret Key <span style="color: red;">*</span></label>
+                                <input type="password" id="x-api-secret" placeholder="Enter your X API Secret Key" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Consumer Secret from Twitter Developer Portal</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-access-token">Access Token <span style="color: red;">*</span></label>
+                                <input type="password" id="x-access-token" placeholder="Enter your X Access Token" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Access Token from Twitter Developer Portal</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-access-token-secret">Access Token Secret <span style="color: red;">*</span></label>
+                                <input type="password" id="x-access-token-secret" placeholder="Enter your X Access Token Secret" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Access Token Secret from Twitter Developer Portal</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-bearer-token">Bearer Token (Optional)</label>
+                                <input type="password" id="x-bearer-token" placeholder="Enter Bearer Token (optional)" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Bearer Token for API v2 (optional, but recommended)</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="xSaveConfig()">💾 Save Configuration</button>
+                            <button class="btn btn-secondary" onclick="xLoadConfig()">🔄 Reload</button>
+                        </div>
+                        
+                        <div style="margin-top: 30px; padding: 15px; background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 4px;">
+                            <h4 style="margin-top: 0;">📝 How to Get Your Credentials</h4>
+                            <ol style="margin: 10px 0; padding-left: 20px;">
+                                <li>Go to <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank">Twitter Developer Portal</a></li>
+                                <li>Create a new Project and App (or use existing)</li>
+                                <li>Navigate to your App → "Keys and tokens" tab</li>
+                                <li>Copy the following:
+                                    <ul style="margin: 5px 0; padding-left: 20px;">
+                                        <li><strong>API Key</strong> (Consumer Key)</li>
+                                        <li><strong>API Secret Key</strong> (Consumer Secret)</li>
+                                        <li><strong>Access Token</strong> and <strong>Access Token Secret</strong> (generate if needed)</li>
+                                        <li><strong>Bearer Token</strong> (optional, for API v2)</li>
+                                    </ul>
+                                </li>
+                                <li>Make sure your app has "Read and Write" permissions</li>
+                                <li>Install Tweepy: <code>pip install tweepy</code></li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <h3>🤖 Grok AI Configuration</h3>
+                        <p class="help-text" style="margin: 5px 0 15px 0;">Configure xAI's Grok for engagement prediction and trend analysis.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                    <span id="grok-status" style="font-weight: bold; padding: 8px 16px; border-radius: 6px; background: #d1fae5; color: #065f46;">✅ Enabled</span>
+                                    <input type="checkbox" id="grok-enabled" checked onchange="grokToggleEnabled()" style="width: 24px; height: 24px; cursor: pointer;">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="grok-message" class="result-box" style="display: none;"></div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="grok-api-key">Grok API Key <span style="color: red;">*</span></label>
+                                <input type="password" id="grok-api-key" placeholder="Enter your Grok API Key (xai-...)" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Get your API key from <a href="https://console.x.ai/" target="_blank">xAI Console</a></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="grok-model-select">Grok Model</label>
+                                <select id="grok-model-select" onchange="grokModelSelectChanged()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="grok-2-1212">grok-2-1212 (Stable, Recommended)</option>
+                                    <option value="grok-3">grok-3 (Advanced Reasoning)</option>
+                                    <option value="grok-beta">grok-beta (Latest Beta)</option>
+                                    <option value="custom">Custom Model Name...</option>
+                                </select>
+                                <p class="help-text">Select a model or choose "Custom" to enter your own model name.</p>
+                            </div>
+                            <div class="form-group" id="grok-custom-model-container" style="display: none;">
+                                <label for="grok-custom-model">Custom Model Name</label>
+                                <input type="text" id="grok-custom-model" placeholder="Enter model name (e.g., grok-4)" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                <p class="help-text">Enter the exact model name from xAI documentation.</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="grokSaveConfig()">💾 Save Configuration</button>
+                            <button class="btn btn-secondary" onclick="grokTestConnection()">🧪 Test Connection</button>
+                            <button class="btn btn-secondary" onclick="grokLoadConfig()">🔄 Reload</button>
+                        </div>
+                        
+                        <div id="grok-test-result" style="margin-top: 15px;"></div>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 4px;">
+                            <h4 style="margin-top: 0;">ℹ️  About Grok AI Integration</h4>
+                            <p style="margin: 5px 0;">Grok AI enhances signal analysis with:</p>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Engagement Prediction:</strong> Predicts how many likes/retweets your tweet will get</li>
+                                <li><strong>Trend Analysis:</strong> Identifies if topics are currently trending</li>
+                                <li><strong>Content Optimization:</strong> Suggests best posting times and formats</li>
+                                <li><strong>Sentiment Analysis:</strong> Analyzes market sentiment for tickers</li>
+                            </ul>
+                            <p style="margin: 5px 0; font-size: 0.9em; color: #666;"><strong>Note:</strong> Grok API usage may incur costs. Check <a href="https://x.ai/pricing" target="_blank">xAI Pricing</a> for details.</p>
+                            <p style="margin: 10px 0 5px 0; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; font-size: 0.9em; color: #92400e; border-radius: 4px;">
+                                <strong>⚠️ Required:</strong> Grok API is required for X module. Tweet generation searches X for latest trends and facts. Analysis will fail if Grok is disabled.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <h3>🔍 X Bot Filter Keywords</h3>
+                        <p class="help-text" style="margin: 5px 0 15px 0;">Configure keywords to automatically filter signals to the X channel. Signals with titles containing any of these keywords will be assigned to the X channel.</p>
+                        
+                        <div class="form-group">
+                            <label for="x-bot-keywords">Keywords (separated by " OR ")</label>
+                            <input type="text" id="x-bot-keywords" placeholder='e.g., "flow-bot" OR "uwhale-news-bot" OR "x-news-bot"' style="font-family: monospace; width: 100%;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                            <p class="help-text">Enter keywords in quotes, separated by " OR " (case-insensitive). Example: <code>"flow-bot" OR "uwhale-news-bot" OR "x-news-bot"</code></p>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="saveXBotKeywords()">💾 Save Keywords</button>
+                            <button class="btn btn-secondary" onclick="loadXBotKeywords()">🔄 Reload</button>
+                        </div>
+                        
+                        <div id="x-bot-keywords-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- TradingView Executor Tab -->
+        <div id="tradingview-executor-tab" class="tab-content">
+            <section class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="margin: 0;">📺 TradingView Executor</h2>
+                        <p class="help-text" style="margin: 5px 0 0 0;">Automated execution of TradingView signals with incremental price adjustment.</p>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <span id="tradingview-executor-status" style="font-weight: bold; padding: 8px 16px; border-radius: 6px; background: #d1fae5; color: #065f46;">✅ Enabled</span>
+                            <input type="checkbox" id="tradingview-executor-enabled" checked onchange="tradingviewExecutorToggleEnabled()" style="width: 24px; height: 24px; cursor: pointer;">
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="tradingview-executor-message" class="result-box" style="display: none;"></div>
+                
+                <h3>Configuration</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="tradingview-platform">Trading Platform</label>
+                        <select id="tradingview-platform">
+                            <option value="etrade" selected>E*TRADE (Default)</option>
+                            <option value="webull">Webull</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradingview-position-size">Position Size</label>
+                        <input type="number" id="tradingview-position-size" step="0.001" min="0.001" max="100.0" value="1.0" inputmode="decimal" autocomplete="off">
+                        <p class="help-text">Default: 1.0 (Range: 0.001 to 100.000)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradingview-bid-delta">Bid Delta</label>
+                        <input type="number" id="tradingview-bid-delta" step="0.001" min="0.001" max="100.0" value="0.01" inputmode="decimal" autocomplete="off">
+                        <p class="help-text">Price adjustment for buy start (Range: 0.001 to 100.000)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradingview-ask-delta">Ask Delta</label>
+                        <input type="number" id="tradingview-ask-delta" step="0.001" min="0.001" max="100.0" value="0.01" inputmode="decimal" autocomplete="off">
+                        <p class="help-text">Price adjustment for sell start (Range: 0.001 to 100.000)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradingview-increments">Increments</label>
+                        <input type="number" id="tradingview-increments" step="0.001" min="0.001" max="100.0" value="0.01" inputmode="decimal" autocomplete="off">
+                        <p class="help-text">Price step size (Range: 0.001 to 100.000)</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="tradingviewExecutorSaveConfig()">💾 Save</button>
+                    <button class="btn btn-secondary" onclick="tradingviewExecutorLoadConfig()">🔄 Reload</button>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 15px; background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 4px;">
+                    <h4 style="margin-top: 0;">Execution Logic</h4>
+                    <p><strong>BUY:</strong> Start at (Price - Bid Δ), increment until (Price + Ask Δ)</p>
+                    <p><strong>SELL:</strong> Start at (Price + Ask Δ), decrement until (Price - Bid Δ)</p>
+                    <p><em>Uses Fill-or-Kill orders, increments by step size on each attempt</em></p>
+                </div>
+            </section>
+            
+            <section class="section">
+                <h2>Manual Execution</h2>
+                <p class="help-text">Manually execute a trade using TradingView Executor settings</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Symbol <span style="color: red;">*</span></label>
+                        <input type="text" id="tradingview-exec-symbol" placeholder="SPY" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label>Action <span style="color: red;">*</span></label>
+                        <select id="tradingview-exec-action">
+                            <option value="BUY">BUY</option>
+                            <option value="SELL">SELL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price <span style="color: red;">*</span></label>
+                        <input type="number" id="tradingview-exec-price" step="0.01" placeholder="678.99" inputmode="decimal" autocomplete="off">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="tradingviewExecutorExecute()">🚀 Execute Trade</button>
+                <div id="tradingview-executor-result" style="margin-top: 20px;"></div>
+            </section>
+            
+            <section class="section">
+                <details class="collapse-section">
+                    <summary>Execution History</summary>
+                    <div class="accordion-body">
+                        <p class="help-text">View past TradingView signal executions with detailed logs</p>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button class="btn btn-secondary" onclick="tradingviewExecutorLoadHistory()">🔄 Refresh</button>
+                            <button class="btn btn-danger" onclick="tradingviewExecutorClearHistory()">🗑️ Clear History</button>
+                        </div>
+                        <div id="tradingview-executor-history"></div>
+                    </div>
+                </details>
+            </section>
+        </div>
+
+        <!-- Smart Executor Tab -->
+        <div id="executor-tab" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h1 style="margin: 0;">🤖 Smart Trade Executor</h1>
+                    <p class="help-text" style="margin: 5px 0 0 0;">Intelligent order execution with 7 steps: validates fields, infers dates, finds options chains, verifies strikes, calculates position size (uses budget filters), fills orders incrementally, and places take-profit sell orders (uses selling filters).</p>
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <span id="smart-executor-status" style="font-weight: bold; padding: 8px 16px; border-radius: 6px; background: #d1fae5; color: #065f46;">✅ Enabled</span>
+                        <input type="checkbox" id="smart-executor-enabled" checked onchange="smartExecutorToggleEnabled()" style="width: 24px; height: 24px; cursor: pointer;">
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Budget Filters Section -->
+            <section class="section">
+                <details class="collapse-section" open>
+                    <summary>💰 Budget Filters</summary>
+                    <div class="accordion-body">
+                        <p class="help-text">Configure budget amounts based on signal title keywords. If no filter matches, default budget is used ($350 for position_size=2, $700 otherwise).</p>
+                        
+                        <div id="budget-filters-list" style="margin-bottom: 15px;">
+                            <!-- Budget filters will be rendered here -->
+                        </div>
+                        
+                        <button class="btn btn-secondary" onclick="addBudgetFilter()" style="margin-bottom: 15px;">➕ Add Budget Filter</button>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="saveBudgetFilters()">💾 Save Filters</button>
+                            <button class="btn btn-secondary" onclick="loadBudgetFilters()">🔄 Reload</button>
+                        </div>
+                    </div>
+                </details>
+            </section>
+            
+            <!-- Selling Strategy Filters Section -->
+            <section class="section">
+                <details class="collapse-section" open>
+                    <summary>📈 Selling Strategy Filters</summary>
+                    <div class="accordion-body">
+                        <p class="help-text">Configure Step 7 take-profit selling strategy based on signal title keywords. Default: sell 80% of position at 1.3x (30% profit).</p>
+                        
+                        <div id="selling-filters-list" style="margin-bottom: 15px;">
+                            <!-- Selling strategy filters will be rendered here -->
+                        </div>
+                        
+                        <button class="btn btn-secondary" onclick="addSellingFilter()" style="margin-bottom: 15px;">➕ Add Selling Strategy</button>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="saveSellingFilters()">💾 Save Strategies</button>
+                            <button class="btn btn-secondary" onclick="loadSellingFilters()">🔄 Reload</button>
+                        </div>
+                    </div>
+                </details>
+            </section>
+            
+            <section class="section">
+                <details class="collapse-section">
+                    <summary>Execution History</summary>
+                    <div class="accordion-body">
+                        <p class="help-text">View past execution attempts with detailed logs</p>
+                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                            <button class="btn btn-secondary" onclick="executorLoadHistory()">🔄 Refresh History</button>
+                            <button class="btn btn-danger" onclick="executorClearHistory()">🗑️ Clear All History</button>
+                        </div>
+                        <div id="executor-history" style="margin-top: 12px;"></div>
+                    </div>
+                </details>
+            </section>
+            
+            <!-- Execute Trade Section -->
+            <section class="section">
+                <details class="collapse-section">
+                    <summary>🚀 Execute Trade</summary>
+                    <div class="accordion-body">
+                        <p class="help-text">⚠️ <strong>Note:</strong> Only BUY orders are supported. The system will validate all fields, infer missing dates, and attempt to fill the order with incremental pricing (-10% to +15%).</p>
+                        
+                        <div class="form-group">
+                            <label>Trading Platform <span style="color: red;">*</span></label>
+                            <select id="executor-platform">
+                                <option value="snaptrade" selected>SnapTrade</option>
+                            </select>
+                        </div>
+                        
+                        <h3 style="margin-top: 20px;">Required Fields</h3>
+                        <div class="form-grid">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Signal Title <small style="color: #6b7280;">(optional - for budget/selling filter matching)</small></label>
+                                <input type="text" id="executor-signal-title" placeholder="e.g., VIP Alert, Scalp Play, Swing Trade" inputmode="text" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Stock Ticker <span style="color: red;">*</span></label>
+                                <input type="text" id="executor-ticker" placeholder="AAPL" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                            </div>
+                            <div class="form-group">
+                                <label>Direction <span style="color: red;">*</span></label>
+                                <select id="executor-direction">
+                                    <option value="BUY">BUY</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Option Type <span style="color: red;">*</span></label>
+                                <select id="executor-option-type">
+                                    <option value="CALL">CALL</option>
+                                    <option value="PUT">PUT</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Strike Price <span style="color: red;">*</span></label>
+                                <input type="number" step="0.01" id="executor-strike" placeholder="150.00" inputmode="decimal" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Purchase Price <span style="color: red;">*</span></label>
+                                <input type="number" step="0.01" id="executor-price" placeholder="2.50" inputmode="decimal" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Input Position Size <small style="color: #6b7280;">(or "lotto")</small></label>
+                                <input type="text" id="executor-pos-size" placeholder="2 or lotto" value="2" inputmode="text" autocomplete="off">
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 20px;">Optional: Expiration Date</h3>
+                        <p class="help-text">💡 If you provide month and day without year, the system will infer the year. If no date is provided, the system will search for the nearest available options chain.</p>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Month (01-12)</label>
+                                <input type="text" id="executor-month" placeholder="03" maxlength="2" inputmode="numeric" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Day (01-31)</label>
+                                <input type="text" id="executor-day" placeholder="22" maxlength="2" inputmode="numeric" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Year (optional)</label>
+                                <input type="text" id="executor-year" placeholder="2025" maxlength="4" inputmode="numeric" autocomplete="off">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="executorExecuteTrade()" style="margin-top: 16px;">🚀 Execute Smart Trade</button>
+                        
+                        <div id="executor-result" style="margin-top: 20px;"></div>
+                    </div>
+                </details>
+            </section>
+        </div>
+    </div>
+
+    <nav class="mobile-tabs" aria-label="Primary navigation for mobile">
+        <button class="tab-btn mobile-tab-btn active" onclick="switchTab('dashboard', this)">
+            <span class="mobile-tab-icon">📊</span>
+            <span class="mobile-tab-label">Dashboard</span>
+        </button>
+        <button class="tab-btn mobile-tab-btn" onclick="switchTab('executor', this)">
+            <span class="mobile-tab-icon">🤖</span>
+            <span class="mobile-tab-label">Executor</span>
+        </button>
+        <button class="tab-btn mobile-tab-btn" onclick="switchTab('x', this)">
+            <span class="mobile-tab-icon">🐦</span>
+            <span class="mobile-tab-label">X</span>
+        </button>
+        <button class="tab-btn mobile-tab-btn mobile-tab-btn--more" id="mobile-more-btn" type="button" onclick="openMoreSheet()">
+            <span class="mobile-tab-icon">☰</span>
+            <span class="mobile-tab-label">More</span>
+        </button>
+    </nav>
+
+    <div class="more-sheet" id="more-sheet" aria-hidden="true">
+        <div class="more-sheet__backdrop" onclick="closeMoreSheet()"></div>
+        <div class="more-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="more-sheet-title">
+            <div class="more-sheet__header">
+                <h3 id="more-sheet-title">More Destinations</h3>
+                <button class="more-sheet__close" type="button" onclick="closeMoreSheet()">✕</button>
+            </div>
+            <div class="more-sheet__grid">
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('snaptrade', this); closeMoreSheet();">🔗 SnapTrade</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('prompt-builder', this); closeMoreSheet();">🏗️ Prompt Builder</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('channels', this); closeMoreSheet();">📡 Channels</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('tradingview-executor', this); closeMoreSheet();">📺 TradingView Executor</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('etrade', this); closeMoreSheet();">📈 E*TRADE</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('discord', this); closeMoreSheet();">💬 Discord</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('notifications', this); closeMoreSheet();">🔔 Notifications</button>
+                <button class="tab-btn more-sheet__btn" onclick="switchTab('settings', this); closeMoreSheet();">⚙️ Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='api-wrapper.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.2"></script>
+    <script src="{{ url_for('static', filename='snaptrade.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='etrade.js') }}?v=3.0"></script>
+    <script src="{{ url_for('static', filename='executor.js') }}?v=3.0"></script>
+    <script src="{{ url_for('static', filename='tradingview_executor.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='discord.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='discord-browser.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='x.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='pwa-push.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='notifications.js') }}?v=1.0"></script>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <!-- Platform detection for native title bar -->
+    <script>
+        (async function() {
+            if (window.electronAPI && window.electronAPI.isElectron) {
+                document.body.classList.add('electron-app');
+                try {
+                    const platform = await window.electronAPI.getPlatform();
+                    document.body.classList.add('platform-' + platform);
+                } catch (e) {
+                    console.log('Could not detect platform');
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
