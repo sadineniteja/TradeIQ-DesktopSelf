@@ -710,7 +710,7 @@
           console.log('Discord already loaded, reloading to check login status...');
           webview.reload();
         } else {
-          webview.src = 'https://discord.com/app';
+        webview.src = 'https://discord.com/app';
         }
       };
       

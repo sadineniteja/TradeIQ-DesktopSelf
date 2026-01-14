@@ -1,0 +1,1237 @@
+140704668413824 2026-01-14 00:52:15,680 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:52:15Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "69897e05-ff23-55fa-864d-0de2f61e909b",
+    "x-signature": "hViW6F4kTwIEcQu/qr7zOxHbxT4=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: 719a2024-7ff4-4698-8b2b-909311c162b3
+140704668413824 2026-01-14 00:52:15,680 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "719a2024-7ff4-4698-8b2b-909311c162b3"
+}
+140704668413824 2026-01-14 00:52:17,572 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:52:17Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "cf350dde-ece1-590d-9e3a-00f82e40a4af",
+    "x-signature": "/ilcIzECotO9PXafxyuj6k+KTFI=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: e27bfa8a-c309-4b90-9ca4-6931b841e07c
+140704668413824 2026-01-14 00:52:17,573 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "e27bfa8a-c309-4b90-9ca4-6931b841e07c"
+}
+140704668413824 2026-01-14 00:54:21,188 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:54:20Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "28cb5512-66f7-5575-a145-893adf29903f",
+    "x-signature": "C6QinHlPC4xUEWzL8Cu1x4ylS+s=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: 93d37963-b358-452f-b997-5373fa13b40f
+140704668413824 2026-01-14 00:54:21,189 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "93d37963-b358-452f-b997-5373fa13b40f"
+}
+140704668413824 2026-01-14 00:55:09,312 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:55:09Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "fcdde1cb-9b8f-5671-8391-cab6c4341f2e",
+    "x-signature": "Y+bUa1Pm22JnIBvE2Irh6LYv2L4=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: fa42c380-b9fc-4e9d-a82b-e18186cd3bc3
+140704668413824 2026-01-14 00:55:09,313 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "fa42c380-b9fc-4e9d-a82b-e18186cd3bc3"
+}
+140704668413824 2026-01-14 00:56:10,056 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:56:09Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "2a3f0efb-d5cd-5cda-942b-006d697f1374",
+    "x-signature": "wt1WGQvAcO4X7g2oLoZuI+8eVTg=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: fde80f23-0e1b-4953-bda2-ddc6ee9a3fc6
+140704668413824 2026-01-14 00:56:10,056 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "fde80f23-0e1b-4953-bda2-ddc6ee9a3fc6"
+}
+140704668413824 2026-01-14 00:56:14,009 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:56:13Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "2feaf2bc-e143-5ced-9d9a-0dbab54216f3",
+    "x-signature": "4UrtfOl/CfQkY/cf4cmlFmIzyiI=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: c2b05205-6090-4313-8011-793c4464c4a7
+140704668413824 2026-01-14 00:56:14,009 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:56:13Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "2feaf2bc-e143-5ced-9d9a-0dbab54216f3",
+    "x-signature": "4UrtfOl/CfQkY/cf4cmlFmIzyiI=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: c2b05205-6090-4313-8011-793c4464c4a7
+140704668413824 2026-01-14 00:56:14,010 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "c2b05205-6090-4313-8011-793c4464c4a7"
+}
+140704668413824 2026-01-14 00:56:14,010 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "c2b05205-6090-4313-8011-793c4464c4a7"
+}
+140704668413824 2026-01-14 00:57:20,102 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:57:19Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "563897c3-ae08-5ce6-8a57-c08a3c7bc153",
+    "x-signature": "p1P2K6JcVH6zw+ZfqcGxNzt8//I=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: 58431abc-2dc8-49d5-981d-42cfa36cd4ae
+140704668413824 2026-01-14 00:57:20,104 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "58431abc-2dc8-49d5-981d-42cfa36cd4ae"
+}
+140704668413824 2026-01-14 00:57:20,218 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:57:20Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "aab3fe2d-ee42-5659-9228-52050d71daef",
+    "x-signature": "IRCqtbVQtet53nM5te8Lv4U072o=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: 8ea866d6-fba1-4833-bff0-315e76625720
+140704668413824 2026-01-14 00:57:20,218 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T06:57:20Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "aab3fe2d-ee42-5659-9228-52050d71daef",
+    "x-signature": "IRCqtbVQtet53nM5te8Lv4U072o=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: 8ea866d6-fba1-4833-bff0-315e76625720
+140704668413824 2026-01-14 00:57:20,219 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "8ea866d6-fba1-4833-bff0-315e76625720"
+}
+140704668413824 2026-01-14 00:57:20,219 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "8ea866d6-fba1-4833-bff0-315e76625720"
+}
+140704668413824 2026-01-14 00:58:21,714 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 00:58:21,714 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 00:58:21,714 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:00:45,742 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:04:41,945 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:08:33,583 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:09:05,622 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/quote/instrument/list",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {
+    "symbols": "AAPL",
+    "category": "US_STOCK"
+  },
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:09:05Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "a297a1e9-ef18-55cb-a673-be427685ca28",
+    "x-signature": "FTFTEBVuANbzowjnc2UFDNxhVYg=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_msg': '404 Route Not Found'} ServerException:HTTP Status: 404, Code: SDK.UnknownServerError, Msg: , RequestID: None
+140704668413824 2026-01-14 01:09:05,623 webull.core.client ERROR get_response exception. {
+  "error_code": "SDK.UnknownServerError",
+  "error_msg": "",
+  "http_status": 404,
+  "request_id": null
+}
+140704668413824 2026-01-14 01:09:05,808 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:09:05Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "4130d56a-fb8d-5c9e-be05-499f7d39474d",
+    "x-signature": "ng4ZjyqqzJtD1ZNOr9SXbqC++Ok=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "318",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "f687d06dbec446f1a7c4f467aac27830",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "symbol": "AAPL",
+            "market": "US"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"f687d06dbec446f1a7c4f467aac27830\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"symbol\":\"AAPL\",\"market\":\"US\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid market', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid market, RequestID: 3d48da81-a0f9-41e5-b6dc-d850a9ff4d1f
+140704668413824 2026-01-14 01:09:05,809 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid market",
+  "http_status": 417,
+  "request_id": "3d48da81-a0f9-41e5-b6dc-d850a9ff4d1f"
+}
+140704668413824 2026-01-14 01:10:46,322 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:11:16,195 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:11:32,212 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/quote/instrument/list",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {
+    "symbols": "AAPL",
+    "category": "US_STOCK"
+  },
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:11:32Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "5669840c-896d-5cfc-985d-b914b5e748bf",
+    "x-signature": "hIw6Ao/DTQ4Lhxm+x2YfZl6zdwY=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_msg': '404 Route Not Found'} ServerException:HTTP Status: 404, Code: SDK.UnknownServerError, Msg: , RequestID: None
+140704668413824 2026-01-14 01:11:32,212 webull.core.client ERROR get_response exception. {
+  "error_code": "SDK.UnknownServerError",
+  "error_msg": "",
+  "http_status": 404,
+  "request_id": null
+}
+140704668413824 2026-01-14 01:12:14,098 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "test",
+    "x-timestamp": "2026-01-14T07:12:13Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "619618b7-0457-5f05-af8d-a9dc6a62823b",
+    "x-signature": "pdrkEAx5cXbI8LR95UpfyIkkVMU=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: 4bfa4ac3-ca03-48aa-b426-ed9b8c097998
+140704668413824 2026-01-14 01:12:14,098 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "4bfa4ac3-ca03-48aa-b426-ed9b8c097998"
+}
+140704668413824 2026-01-14 01:12:55,059 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:13:43,351 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:13:57,823 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:13:57Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "02f8dfc9-c898-534d-8aba-bddd33ff452e",
+    "x-signature": "E4so34LofPPBh8pSKGjCayQRtLw=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "304",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "d564a42d4f7a4dc58da5b67d91d38ec9",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "symbol": "AAPL"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"d564a42d4f7a4dc58da5b67d91d38ec9\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"symbol\":\"AAPL\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid market', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid market, RequestID: f0567258-1c90-463f-863d-0efda9b86ad7
+140704668413824 2026-01-14 01:13:57,824 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid market",
+  "http_status": 417,
+  "request_id": "f0567258-1c90-463f-863d-0efda9b86ad7"
+}
+140704668413824 2026-01-14 01:19:15,877 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:19:49,934 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:19:49Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "b9ec7fc8-af12-5bb7-8f48-1d57a3732c32",
+    "x-signature": "j5sumQR9i56BrRbSfmz0Q7nLiqk=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "318",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "21a8157e904b4c1f878af4849701f5d3",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "symbol": "AAPL",
+            "market": "us"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"21a8157e904b4c1f878af4849701f5d3\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"symbol\":\"AAPL\",\"market\":\"us\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid market', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid market, RequestID: 11a98465-c9fe-40a0-9448-8dbeb86c4678
+140704668413824 2026-01-14 01:19:49,934 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid market",
+  "http_status": 417,
+  "request_id": "11a98465-c9fe-40a0-9448-8dbeb86c4678"
+}
+140704668413824 2026-01-14 01:19:58,935 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:19:58Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "5234d10a-88a1-51b5-91db-9e415cd2ae68",
+    "x-signature": "vQI2d53jSbdaVSaDUcf91Q/cojQ=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "318",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "891d56cba12a48e8b3ef56505bfacf3c",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "symbol": "AAPL",
+            "market": "us"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"891d56cba12a48e8b3ef56505bfacf3c\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"symbol\":\"AAPL\",\"market\":\"us\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid market', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid market, RequestID: ec74d06b-b11a-4d7f-a9c0-e6cb9ea6fcbd
+140704668413824 2026-01-14 01:19:58,935 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid market",
+  "http_status": 417,
+  "request_id": "ec74d06b-b11a-4d7f-a9c0-e6cb9ea6fcbd"
+}
+140704668413824 2026-01-14 01:20:02,252 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:20:02Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "810be0b7-7923-56ce-9d55-e791a45c0116",
+    "x-signature": "7o8JIJ+8sckFOaWEysr4njgiRAM=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "318",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "ae128adc24e44086871ffe7b82db2377",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "symbol": "AAPL",
+            "market": "us"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"ae128adc24e44086871ffe7b82db2377\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"symbol\":\"AAPL\",\"market\":\"us\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid market', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid market, RequestID: 7279dd5e-550a-4ae1-910a-2bcb9cbea78a
+140704668413824 2026-01-14 01:20:02,252 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid market",
+  "http_status": 417,
+  "request_id": "7279dd5e-550a-4ae1-910a-2bcb9cbea78a"
+}
+140704668413824 2026-01-14 01:23:00,017 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:25:45,207 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "test",
+    "x-timestamp": "2026-01-14T07:25:44Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "2b1899cf-2224-548a-80bd-c170b757fc42",
+    "x-signature": "OGucAAH1TzKnONXHJRGpKCUjXNs=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: cc2e0b4d-b62b-4415-8d53-1cb8be42262f
+140704668413824 2026-01-14 01:25:45,207 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "cc2e0b4d-b62b-4415-8d53-1cb8be42262f"
+}
+140704668413824 2026-01-14 01:25:47,734 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/config",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "GET",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "test",
+    "x-timestamp": "2026-01-14T07:25:47Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "847a01a4-247c-5def-9ee2-932f4f5c8248",
+    "x-signature": "6Ei8T6jhnyeFH3Kiw2ssjAfNeRg=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3"
+  },
+  "_body_params": null,
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": null,
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'error_code': 'UNAUTHORIZED'} ServerException:HTTP Status: 401, Code: UNAUTHORIZED, Msg: , RequestID: e485eb19-6b44-4eed-923d-40b7607a8b87
+140704668413824 2026-01-14 01:25:47,735 webull.core.client ERROR get_response exception. {
+  "error_code": "UNAUTHORIZED",
+  "error_msg": "",
+  "http_status": 401,
+  "request_id": "e485eb19-6b44-4eed-923d-40b7607a8b87"
+}
+140704668413824 2026-01-14 01:28:12,649 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:28:12,761 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:28:31,558 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:28:31Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "4ca8afb2-e4ac-51c2-81da-2e5aa8fa985f",
+    "x-signature": "u/fg+S7t81dJkqZEzOHKwj7XZqg=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "316",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "24e191353ffa4ccc851afacb96191054",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "instrument_id": "913256135"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"24e191353ffa4ccc851afacb96191054\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"instrument_id\":\"913256135\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid market', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid market, RequestID: 1e8a35e4-60a3-40dd-8ab1-843afdba1751
+140704668413824 2026-01-14 01:28:31,559 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid market",
+  "http_status": 417,
+  "request_id": "1e8a35e4-60a3-40dd-8ab1-843afdba1751"
+}
+140704668413824 2026-01-14 01:31:04,420 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:31:04,536 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:31:16,593 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/stock/order/preview",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:31:16Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "f46e54b2-508d-563f-b2d9-fb7391cc6477",
+    "x-signature": "B3pW1XgDLkmbq7zI9YhJrXLmIfk=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "344",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA",
+    "new_orders": [
+      {
+        "client_order_id": "4e7327386094422e89d18a2ccc5f7229",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "1",
+        "side": "BUY",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "market": "US",
+        "orders": [
+          {
+            "side": "BUY",
+            "quantity": "1",
+            "instrument_id": "913256135",
+            "market": "US"
+          }
+        ],
+        "limit_price": "100"
+      }
+    ]
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\",\"new_orders\":[{\"client_order_id\":\"4e7327386094422e89d18a2ccc5f7229\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"1\",\"side\":\"BUY\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"market\":\"US\",\"orders\":[{\"side\":\"BUY\",\"quantity\":\"1\",\"instrument_id\":\"913256135\",\"market\":\"US\"}],\"limit_price\":\"100\"}]}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'Parameter error, invalid symbol', 'error_code': 'OAUTH_OPENAPI_PARAM_ERR'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_PARAM_ERR, Msg: Parameter error, invalid symbol, RequestID: 620dfe38-5e95-4c35-b0a0-8b6745c4cf69
+140704668413824 2026-01-14 01:31:16,593 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_PARAM_ERR",
+  "error_msg": "Parameter error, invalid symbol",
+  "http_status": 417,
+  "request_id": "620dfe38-5e95-4c35-b0a0-8b6745c4cf69"
+}
+140704668413824 2026-01-14 01:33:03,509 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:33:03,608 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:33:15,643 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/trade/order/place",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:33:15Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "528fddd7-e83f-562b-8786-4cc66b2726fa",
+    "x-signature": "Wq+57/xAQYfhHWIN25jIOfTRJ6U=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "247",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "stock_order": {
+      "client_order_id": "be3386484e91495da8c06cbb7f75981a",
+      "instrument_id": "913256135",
+      "qty": "1",
+      "side": "BUY",
+      "tif": "GTC",
+      "extended_hours_trading": false,
+      "order_type": "LIMIT",
+      "limit_price": "100"
+    },
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA"
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"stock_order\":{\"client_order_id\":\"be3386484e91495da8c06cbb7f75981a\",\"instrument_id\":\"913256135\",\"qty\":\"1\",\"side\":\"BUY\",\"tif\":\"GTC\",\"extended_hours_trading\":false,\"order_type\":\"LIMIT\",\"limit_price\":\"100\"},\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\"}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>",
+  "_stock_order": {
+    "client_order_id": "be3386484e91495da8c06cbb7f75981a",
+    "instrument_id": "913256135",
+    "qty": "1",
+    "side": "BUY",
+    "tif": "GTC",
+    "extended_hours_trading": false,
+    "order_type": "LIMIT",
+    "limit_price": "100"
+  }
+} Response:{'message': 'ORDER_BEFORE_BROKER_TRADING_TIME', 'error_code': 'ORDER_BEFORE_BROKER_TRADING_TIME'} ServerException:HTTP Status: 417, Code: ORDER_BEFORE_BROKER_TRADING_TIME, Msg: ORDER_BEFORE_BROKER_TRADING_TIME, RequestID: ff5b73ca-64d0-4649-9c12-3ef6c003994c
+140704668413824 2026-01-14 01:33:15,644 webull.core.client ERROR get_response exception. {
+  "error_code": "ORDER_BEFORE_BROKER_TRADING_TIME",
+  "error_msg": "ORDER_BEFORE_BROKER_TRADING_TIME",
+  "http_status": 417,
+  "request_id": "ff5b73ca-64d0-4649-9c12-3ef6c003994c"
+}
+140704668413824 2026-01-14 01:43:32,901 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:43:33,064 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:43:58,152 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/trade/order/place",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T07:43:57Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "8a1dd5c9-a067-5869-9009-62a04197c1ab",
+    "x-signature": "F4cvriJkBpaeXWQrMGc3OUIw2U4=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "246",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "stock_order": {
+      "client_order_id": "f17d29e80733469d862fd052375cd2d7",
+      "instrument_id": "913256135",
+      "qty": "1",
+      "side": "BUY",
+      "tif": "GTC",
+      "extended_hours_trading": true,
+      "order_type": "LIMIT",
+      "limit_price": "100"
+    },
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA"
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"stock_order\":{\"client_order_id\":\"f17d29e80733469d862fd052375cd2d7\",\"instrument_id\":\"913256135\",\"qty\":\"1\",\"side\":\"BUY\",\"tif\":\"GTC\",\"extended_hours_trading\":true,\"order_type\":\"LIMIT\",\"limit_price\":\"100\"},\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\"}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>",
+  "_stock_order": {
+    "client_order_id": "f17d29e80733469d862fd052375cd2d7",
+    "instrument_id": "913256135",
+    "qty": "1",
+    "side": "BUY",
+    "tif": "GTC",
+    "extended_hours_trading": true,
+    "order_type": "LIMIT",
+    "limit_price": "100"
+  }
+} Response:{'message': 'ORDER_BEFORE_BROKER_TRADING_TIME', 'error_code': 'ORDER_BEFORE_BROKER_TRADING_TIME'} ServerException:HTTP Status: 417, Code: ORDER_BEFORE_BROKER_TRADING_TIME, Msg: ORDER_BEFORE_BROKER_TRADING_TIME, RequestID: 69fbe2c9-d5c0-4a7a-a6ca-23da98fba6ff
+140704668413824 2026-01-14 01:43:58,153 webull.core.client ERROR get_response exception. {
+  "error_code": "ORDER_BEFORE_BROKER_TRADING_TIME",
+  "error_msg": "ORDER_BEFORE_BROKER_TRADING_TIME",
+  "http_status": 417,
+  "request_id": "69fbe2c9-d5c0-4a7a-a6ca-23da98fba6ff"
+}
+140704668413824 2026-01-14 01:51:19,980 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:51:20,159 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:54:51,981 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:54:52,111 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:58:43,495 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 01:58:43,638 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:08:53,047 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:08:53,170 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:09:14,474 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/option/order/place",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T08:09:14Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "3fca3eb1-1264-55b3-9c6a-f60527e49313",
+    "x-signature": "p/7VV85IGbL7UXYlpKc4O3O7xno=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "450",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "new_orders": [
+      {
+        "client_order_id": "e9526fe3eaa9493fac3e70b79afb5a91",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "560",
+        "option_strategy": "SINGLE",
+        "side": "SELL",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "SELL",
+            "quantity": "560",
+            "symbol": "TSLA",
+            "strike_price": "450",
+            "init_exp_date": "2026-01-16",
+            "instrument_type": "OPTION",
+            "option_type": "CALL",
+            "market": "US"
+          }
+        ],
+        "limit_price": "0.02"
+      }
+    ],
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA"
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"new_orders\":[{\"client_order_id\":\"e9526fe3eaa9493fac3e70b79afb5a91\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"560\",\"option_strategy\":\"SINGLE\",\"side\":\"SELL\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"SELL\",\"quantity\":\"560\",\"symbol\":\"TSLA\",\"strike_price\":\"450\",\"init_exp_date\":\"2026-01-16\",\"instrument_type\":\"OPTION\",\"option_type\":\"CALL\",\"market\":\"US\"}],\"limit_price\":\"0.02\"}],\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\"}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'You hold an insufficient number of underlying shares to sell this covered call.', 'error_code': 'OAUTH_OPENAPI_OPTION_CAVERED_CALL_STOCK_NO_ENOUGH'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_OPTION_CAVERED_CALL_STOCK_NO_ENOUGH, Msg: You hold an insufficient number of underlying shares to sell this covered call., RequestID: d72b7af8-8d6d-41af-8910-774b9c90092f
+140704668413824 2026-01-14 02:09:14,476 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_OPTION_CAVERED_CALL_STOCK_NO_ENOUGH",
+  "error_msg": "You hold an insufficient number of underlying shares to sell this covered call.",
+  "http_status": 417,
+  "request_id": "d72b7af8-8d6d-41af-8910-774b9c90092f"
+}
+140704668413824 2026-01-14 02:19:12,848 webull.core.client ERROR ServerException occurred. Host:api.webull.com SDK-Version:1.0.8 Request:{
+  "_version": "v2",
+  "_action_name": "/openapi/trade/option/order/place",
+  "_protocol_type": "https",
+  "_accept_format": "JSON",
+  "_params": {},
+  "_method": "POST",
+  "_header": {
+    "x-version": "v2",
+    "Accept-Encoding": "gzip",
+    "x-app-key": "4506a3a4412c05938027cc17712f9e40",
+    "x-timestamp": "2026-01-14T08:19:12Z",
+    "x-signature-version": "1.0",
+    "x-signature-algorithm": "HMAC-SHA1",
+    "x-signature-nonce": "cdb55484-fd24-50cd-854c-2e32e12cbbb8",
+    "x-signature": "yxgNazXk6Bl4eVk+Gzq7ZMTugqg=",
+    "User-Agent": "WebullApiSDK (Darwin 24.6.0;x86_64) Python/3.11.13 Core/1.0.8 python-requests/2.18.3",
+    "Content-Length": "450",
+    "Content-Type": "application/json"
+  },
+  "_body_params": {
+    "new_orders": [
+      {
+        "client_order_id": "7e3241f25e51445db63fc46e77c5c3eb",
+        "combo_type": "NORMAL",
+        "order_type": "LIMIT",
+        "quantity": "560",
+        "option_strategy": "SINGLE",
+        "side": "SELL",
+        "time_in_force": "GTC",
+        "entrust_type": "QTY",
+        "orders": [
+          {
+            "side": "SELL",
+            "quantity": "560",
+            "symbol": "TSLA",
+            "strike_price": "450",
+            "init_exp_date": "2026-01-16",
+            "instrument_type": "OPTION",
+            "option_type": "CALL",
+            "market": "US"
+          }
+        ],
+        "limit_price": "0.02"
+      }
+    ],
+    "account_id": "1EH0BRKL1C4H1BK0ONTBRBTTPA"
+  },
+  "_uri_pattern": null,
+  "_uri_params": null,
+  "_content": "{\"new_orders\":[{\"client_order_id\":\"7e3241f25e51445db63fc46e77c5c3eb\",\"combo_type\":\"NORMAL\",\"order_type\":\"LIMIT\",\"quantity\":\"560\",\"option_strategy\":\"SINGLE\",\"side\":\"SELL\",\"time_in_force\":\"GTC\",\"entrust_type\":\"QTY\",\"orders\":[{\"side\":\"SELL\",\"quantity\":\"560\",\"symbol\":\"TSLA\",\"strike_price\":\"450\",\"init_exp_date\":\"2026-01-16\",\"instrument_type\":\"OPTION\",\"option_type\":\"CALL\",\"market\":\"US\"}],\"limit_price\":\"0.02\"}],\"account_id\":\"1EH0BRKL1C4H1BK0ONTBRBTTPA\"}",
+  "_extra_user_agent": {},
+  "string_to_sign": "",
+  "_request_connect_timeout": null,
+  "_request_read_timeout": null,
+  "endpoint": "api.webull.com",
+  "_signer_spec": "<module 'webull.core.auth.algorithm.sha_hmac1' from '/Users/superadmin/Desktop/TradeIQ-Desktop/venv/lib/python3.11/site-packages/webull/core/auth/algorithm/sha_hmac1.py'>"
+} Response:{'message': 'You hold an insufficient number of underlying shares to sell this covered call.', 'error_code': 'OAUTH_OPENAPI_OPTION_CAVERED_CALL_STOCK_NO_ENOUGH'} ServerException:HTTP Status: 417, Code: OAUTH_OPENAPI_OPTION_CAVERED_CALL_STOCK_NO_ENOUGH, Msg: You hold an insufficient number of underlying shares to sell this covered call., RequestID: ac14331c-2f18-446f-9471-5116f771d312
+140704668413824 2026-01-14 02:19:12,852 webull.core.client ERROR get_response exception. {
+  "error_code": "OAUTH_OPENAPI_OPTION_CAVERED_CALL_STOCK_NO_ENOUGH",
+  "error_msg": "You hold an insufficient number of underlying shares to sell this covered call.",
+  "http_status": 417,
+  "request_id": "ac14331c-2f18-446f-9471-5116f771d312"
+}
+140704668413824 2026-01-14 02:19:36,941 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:19:37,092 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:26:47,173 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:26:47,299 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:33:40,531 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:33:40,699 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:36:32,892 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:36:33,053 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:39:22,270 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:39:22,393 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:41:48,781 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:41:48,951 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:46:30,409 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:46:30,547 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:50:04,969 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:50:05,115 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:54:38,898 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 02:54:39,031 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 03:00:47,026 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False
+140704668413824 2026-01-14 03:00:47,188 webull.core.http.initializer.client_initializer INFO _check_token_enable result is False

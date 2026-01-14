@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class TradeExecutor:
-    def __init__(self, snaptrade_api, etrade_api, db):
+    def __init__(self, snaptrade_api, etrade_api, db, webull_api=None):
         """
         Initialize Trade Executor with API connections and database
         
@@ -21,11 +21,14 @@ class TradeExecutor:
             snaptrade_api: SnapTrade API proxy instance (or None)
             etrade_api: EtradeAPI instance
             db: Database instance
+            webull_api: WebullAPI instance (or None)
         """
         self.snaptrade_api = snaptrade_api
         self.etrade_api = etrade_api
+        self.webull_api = webull_api
         self.db = db
         self.execution_log = []
+        self._cached_chain = None  # Cache for options chain data between Step 3 and 4
     
     def execute_trade(self, signal_data: Dict, platform: str = "snaptrade") -> Dict:
         """
@@ -48,6 +51,7 @@ class TradeExecutor:
             Dict with execution results and detailed log
         """
         self.execution_log = []
+        self._cached_chain = None  # Clear cache for new execution
         
         # Check if executor is enabled
         enabled = self.db.get_setting("smart_executor_enabled", "true").lower() == "true"
@@ -67,8 +71,39 @@ class TradeExecutor:
         # Create execution attempt record
         execution_id = self.db.create_execution_attempt(signal_data, platform)
         
-        # Select API
-        api = self.snaptrade_api
+        # Get account_id from signal_data and set it on the API
+        account_id = signal_data.get("account_id")
+        
+        if platform == "webull":
+            if not self.webull_api:
+                return self._fail(
+                    "Webull API is not configured. Please set up Webull in the Webull module first.",
+                    step=0,
+                    execution_id=execution_id
+                )
+            if not account_id:
+                return self._fail(
+                    "No account_id provided. Please select an account before executing trades.",
+                    step=0,
+                    execution_id=execution_id
+                )
+            # Set the selected account on the webull_api
+            self.webull_api.default_account_id = account_id
+            self.execution_log.append(f"📊 Using Webull account: {account_id}")
+        elif platform == "etrade":
+            if not self.etrade_api:
+                return self._fail(
+                    "E*TRADE API is not configured. Please set up E*TRADE in the E*TRADE module first.",
+                    step=0,
+                    execution_id=execution_id
+                )
+            self.execution_log.append(f"📈 Using E*TRADE account: {account_id}")
+        else:
+            return self._fail(
+                f"Unknown platform: {platform}. Supported platforms: webull, etrade",
+                step=0,
+                execution_id=execution_id
+            )
         
         # Check if BUY order
         direction = signal_data.get("direction", "").upper()
@@ -117,7 +152,6 @@ class TradeExecutor:
             step3_result = self._step3_find_nearest_options_chain(
                 signal_data["ticker"],
                 signal_data["option_type"],
-                api,
                 platform
             )
             step3_duration = time.time() - step3_start
@@ -142,7 +176,6 @@ class TradeExecutor:
             final_date,
             signal_data["strike_price"],
             signal_data["option_type"],
-            api,
             platform
         )
         step4_duration = time.time() - step4_start
@@ -176,7 +209,6 @@ class TradeExecutor:
         
         step6_start = time.time()
         step6_result = self._step6_fill_order_incremental(
-            api,
             platform,
             signal_data["ticker"],
             final_date,
@@ -329,51 +361,37 @@ class TradeExecutor:
         self,
         ticker: str,
         option_type: str,
-        api,
         platform: str
     ) -> Dict:
         """
-        STEP 3: Get all available expiration dates from yfinance and select the nearest one
-        This is much faster than checking each day individually (1 API call vs 31)
+        STEP 3: Get available expiration dates using yfinance and select the nearest one
+        Only fetches dates (fast) - chain verification happens in Step 4
         """
         today = datetime.now()
-        self.execution_log.append(f"  • Searching for nearest options chain")
+        self.execution_log.append(f"  • Searching for nearest options expiration date")
         self.execution_log.append(f"  • Ticker: {ticker}, Type: {option_type}")
         
         try:
-            import requests
+            import yfinance as yf
             
-            # Get proxy URL from database
-            proxy_url = self.db.get_setting("snaptrade_proxy_url", "")
+            self.execution_log.append(f"  • Fetching available expiration dates via yfinance...")
             
-            if not proxy_url:
-                self.execution_log.append(f"  ❌ SnapTrade proxy URL not configured")
-                return {"success": False, "error": "SnapTrade proxy URL not configured"}
+            # Create ticker object and get available dates only (fast operation)
+            stock = yf.Ticker(ticker.upper())
             
-            # Call proxy endpoint WITHOUT expiry_date to get ALL available dates in one call
-            self.execution_log.append(f"  • Fetching all available expiration dates from yfinance...")
-            params = {"symbol": ticker.upper()}
-            response = requests.get(f"{proxy_url}/api/options-chain", params=params, timeout=30)
-            
-            if response.status_code != 200:
-                self.execution_log.append(f"  ❌ Proxy request failed: {response.status_code}")
-                return {"success": False, "error": f"Proxy request failed: {response.status_code}"}
-            
-            data = response.json()
-            
-            if not data.get("success"):
-                self.execution_log.append(f"  ❌ {data.get('error', 'Unknown error')}")
-                return {"success": False, "error": data.get("error", "Unknown error")}
-            
-            # Get available expiration dates (already sorted by yfinance)
-            available_dates = data.get("available_dates", [])
+            try:
+                available_dates = list(stock.options)  # This is fast - just gets dates
+            except Exception as e:
+                error_msg = f"Failed to get options dates for {ticker}: {str(e)}"
+                self.execution_log.append(f"  ❌ {error_msg}")
+                return {"success": False, "error": error_msg}
             
             if not available_dates:
                 error_msg = f"No options expiration dates available for {ticker}"
                 self.execution_log.append(f"  ❌ {error_msg}")
                 return {"success": False, "error": error_msg}
             
-            self.execution_log.append(f"  ✅ Found {len(available_dates)} available expiration dates")
+            self.execution_log.append(f"  ✅ Found {len(available_dates)} expiration dates")
             self.execution_log.append(f"  • Dates: {', '.join(available_dates[:5])}{'...' if len(available_dates) > 5 else ''}")
             
             # Find the nearest date that is today or in the future
@@ -381,45 +399,22 @@ class TradeExecutor:
             nearest_date = None
             
             for exp_date in available_dates:
-                # Dates from yfinance are already in YYYY-MM-DD format
                 if exp_date >= today_str:
                     nearest_date = exp_date
                     break
             
             if not nearest_date:
-                # All dates are in the past, use the last (most recent) one
+                # All dates are in the past, use the last one
                 nearest_date = available_dates[-1]
-                self.execution_log.append(f"  ⚠️ All dates are in the past, using most recent: {nearest_date}")
+                self.execution_log.append(f"  ⚠️ All dates passed, using: {nearest_date}")
             
-            # Verify the selected date has data for the option type
-            chain = data.get("chain", [])
-            chain_for_date = None
-            
-            for chain_item in chain:
-                if chain_item.get("expiryDate") == nearest_date:
-                    chain_for_date = chain_item
-                    break
-            
-            if chain_for_date:
-                calls = chain_for_date.get("calls", [])
-                puts = chain_for_date.get("puts", [])
-                
-                has_data = False
-                if option_type.upper() == "CALL":
-                    has_data = len(calls) > 0
-                elif option_type.upper() == "PUT":
-                    has_data = len(puts) > 0
-                else:
-                    has_data = len(calls) > 0 or len(puts) > 0
-                
-                if has_data:
-                    self.execution_log.append(f"  ✅ Chain verified: {len(calls)} calls, {len(puts)} puts")
-                else:
-                    self.execution_log.append(f"  ⚠️ Chain exists but no {option_type} data found")
-                
-            self.execution_log.append(f"  ✅ Selected nearest expiration date: {nearest_date}")
+            self.execution_log.append(f"  ✅ Selected nearest date: {nearest_date}")
             return {"success": True, "date": nearest_date}
             
+        except ImportError:
+            error_msg = "yfinance not installed. Run: pip install yfinance"
+            self.execution_log.append(f"  ❌ {error_msg}")
+            return {"success": False, "error": error_msg}
         except Exception as e:
             self.execution_log.append(f"  ❌ Error: {str(e)}")
             import traceback
@@ -432,138 +427,114 @@ class TradeExecutor:
         expiry_date: str,
         strike_price: float,
         option_type: str,
-        api,
         platform: str
     ) -> Dict:
         """
-        STEP 4: Verify strike price exists in options chain
+        STEP 4: Verify strike price exists in options chain using yfinance directly
+        Uses cached chain from Step 3 if available, otherwise fetches fresh data
         """
         self.execution_log.append(f"  • Verifying strike ${strike_price} for {ticker}")
         self.execution_log.append(f"  • Expiry: {expiry_date}, Type: {option_type}")
         
-        # Initialize result to ensure it's always defined
-        result = {"success": False, "error": "Unknown error"}
-        
         try:
-            import requests
+            import yfinance as yf
+            import pandas as pd
             
-            # Get proxy URL from database
-            proxy_url = self.db.get_setting("snaptrade_proxy_url", "")
+            calls = None
+            puts = None
             
-            if not proxy_url:
-                error_msg = "SnapTrade proxy URL not configured"
-                self.execution_log.append(f"  ❌ {error_msg}")
-                return {"success": False, "error": error_msg}
-            
-            self.execution_log.append(f"  • Proxy URL: {proxy_url}")
-            self.execution_log.append(f"  • Fetching options chain from proxy...")
-            
-            # Call proxy endpoint to verify strike
-            params = {
-                "symbol": ticker.upper(),
-                "expiry_date": expiry_date
-            }
-            
-            try:
-                response = requests.get(f"{proxy_url}/api/options-chain", params=params, timeout=30)
-                self.execution_log.append(f"  • Response status: {response.status_code}")
+            # Check if we have cached chain data from Step 3
+            if hasattr(self, '_cached_chain') and self._cached_chain is not None and self._cached_chain.get("date") == expiry_date:
+                self.execution_log.append(f"  • Using cached chain data from Step 3")
+                calls = self._cached_chain.get("calls")
+                puts = self._cached_chain.get("puts")
+            else:
+                # Fetch fresh chain data
+                self.execution_log.append(f"  • Fetching options chain via yfinance...")
+                stock = yf.Ticker(ticker.upper())
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    self.execution_log.append(f"  • Response success: {data.get('success', False)}")
-                    
-                    if data.get("success") and data.get("chain"):
-                        chain = data["chain"]
-                        self.execution_log.append(f"  • Chain length: {len(chain)}")
-                        
-                        if len(chain) > 0:
-                            chain_item = chain[0]
-                            calls = chain_item.get("calls", [])
-                            puts = chain_item.get("puts", [])
-                            
-                            self.execution_log.append(f"  • Found {len(calls)} calls, {len(puts)} puts")
-                            
-                            # Check if strike exists in the chain
-                            strike_found = False
-                            if option_type.upper() == "CALL":
-                                strike_found = any(call.get("strike") == strike_price for call in calls)
-                                self.execution_log.append(f"  • Checking CALL strikes for ${strike_price}...")
-                            elif option_type.upper() == "PUT":
-                                strike_found = any(put.get("strike") == strike_price for put in puts)
-                                self.execution_log.append(f"  • Checking PUT strikes for ${strike_price}...")
-                            else:
-                                strike_found = any(call.get("strike") == strike_price for call in calls) or \
-                                              any(put.get("strike") == strike_price for put in puts)
-                                self.execution_log.append(f"  • Checking both CALL and PUT strikes for ${strike_price}...")
-                            
-                            if strike_found:
-                                self.execution_log.append(f"  ✅ Strike ${strike_price} found in chain")
-                                
-                                # Store the option contract data for use in Step 6
-                                # Find the specific contract to extract its data
-                                option_contract = None
-                                if option_type.upper() == "CALL":
-                                    option_contract = next((c for c in calls if c.get("strike") == strike_price), None)
-                                elif option_type.upper() == "PUT":
-                                    option_contract = next((p for p in puts if p.get("strike") == strike_price), None)
-                                
-                                # Store contract data for later use
-                                result = {
-                                    "success": True,
-                                    "option_contract": option_contract,  # Store the contract data
-                                    "expiry_date": expiry_date,
-                                    "strike": strike_price,
-                                    "option_type": option_type.upper()
-                                }
-                            else:
-                                # Log available strikes for debugging
-                                available_call_strikes = sorted(set([c.get("strike") for c in calls if c.get("strike")]))
-                                available_put_strikes = sorted(set([p.get("strike") for p in puts if p.get("strike")]))
-                                self.execution_log.append(f"  ⚠️ Available CALL strikes: {available_call_strikes[:10]}{'...' if len(available_call_strikes) > 10 else ''}")
-                                self.execution_log.append(f"  ⚠️ Available PUT strikes: {available_put_strikes[:10]}{'...' if len(available_put_strikes) > 10 else ''}")
-                                error_msg = f"Strike ${strike_price} not found in chain"
-                                result = {"success": False, "error": error_msg}
-                        else:
-                            error_msg = "No chain data returned (empty chain array)"
-                            self.execution_log.append(f"  ❌ {error_msg}")
-                            result = {"success": False, "error": error_msg}
-                    else:
-                        error_msg = data.get("error", "Unknown error from proxy")
-                        self.execution_log.append(f"  ❌ Proxy returned error: {error_msg}")
-                        result = {"success": False, "error": error_msg}
-                else:
-                    # Try to parse error response
-                    try:
-                        error_data = response.json()
-                        error_msg = error_data.get("error", f"Proxy request failed with status {response.status_code}")
-                    except:
-                        error_msg = f"Proxy request failed with status {response.status_code}: {response.text[:200]}"
+                try:
+                    chain = stock.option_chain(expiry_date)
+                    calls = chain.calls
+                    puts = chain.puts
+                except Exception as e:
+                    error_msg = f"Failed to get options chain: {str(e)}"
                     self.execution_log.append(f"  ❌ {error_msg}")
-                    result = {"success": False, "error": error_msg}
-                    
-            except requests.exceptions.Timeout:
-                error_msg = "Request to proxy timed out after 30 seconds"
-                self.execution_log.append(f"  ❌ {error_msg}")
-                result = {"success": False, "error": error_msg}
-            except requests.exceptions.ConnectionError as e:
-                error_msg = f"Cannot connect to proxy server: {str(e)}"
-                self.execution_log.append(f"  ❌ {error_msg}")
-                result = {"success": False, "error": error_msg}
-            except Exception as e:
-                error_msg = f"Proxy request error: {str(e)}"
-                self.execution_log.append(f"  ❌ {error_msg}")
-                import traceback
-                self.execution_log.append(f"  • Traceback: {traceback.format_exc()}")
-                result = {"success": False, "error": error_msg}
+                    return {"success": False, "error": error_msg}
             
-            if not result.get("success"):
-                error_msg = f"Could not fetch options chain: {result.get('error', 'Unknown error')}"
-                self.execution_log.append(f"❌ {error_msg}")
+            # Convert to list if DataFrame
+            if isinstance(calls, pd.DataFrame):
+                calls_list = calls.to_dict('records')
+            else:
+                calls_list = list(calls) if calls is not None else []
+                
+            if isinstance(puts, pd.DataFrame):
+                puts_list = puts.to_dict('records')
+            else:
+                puts_list = list(puts) if puts is not None else []
+            
+            self.execution_log.append(f"  • Found {len(calls_list)} calls, {len(puts_list)} puts")
+            
+            # Check if strike exists in the chain
+            strike_found = False
+            option_contract = None
+            
+            if option_type.upper() == "CALL":
+                self.execution_log.append(f"  • Checking CALL strikes for ${strike_price}...")
+                for call in calls_list:
+                    call_strike = call.get("strike")
+                    if call_strike is not None and abs(float(call_strike) - strike_price) < 0.01:
+                        strike_found = True
+                        option_contract = call
+                        break
+            elif option_type.upper() == "PUT":
+                self.execution_log.append(f"  • Checking PUT strikes for ${strike_price}...")
+                for put in puts_list:
+                    put_strike = put.get("strike")
+                    if put_strike is not None and abs(float(put_strike) - strike_price) < 0.01:
+                        strike_found = True
+                        option_contract = put
+                        break
+            else:
+                self.execution_log.append(f"  • Checking both CALL and PUT strikes for ${strike_price}...")
+                for call in calls_list:
+                    call_strike = call.get("strike")
+                    if call_strike is not None and abs(float(call_strike) - strike_price) < 0.01:
+                        strike_found = True
+                        option_contract = call
+                        break
+                if not strike_found:
+                    for put in puts_list:
+                        put_strike = put.get("strike")
+                        if put_strike is not None and abs(float(put_strike) - strike_price) < 0.01:
+                            strike_found = True
+                            option_contract = put
+                            break
+            
+            if strike_found:
+                self.execution_log.append(f"  ✅ Strike ${strike_price} found in chain")
+                self.execution_log.append(f"✅ STEP 4 Complete: Strike price ${strike_price} verified")
+                return {
+                    "success": True,
+                    "option_contract": option_contract,
+                    "expiry_date": expiry_date,
+                    "strike": strike_price,
+                    "option_type": option_type.upper()
+                }
+            else:
+                # Log available strikes for debugging
+                available_call_strikes = sorted(set([c.get("strike") for c in calls_list if c.get("strike") is not None]))
+                available_put_strikes = sorted(set([p.get("strike") for p in puts_list if p.get("strike") is not None]))
+                self.execution_log.append(f"  ⚠️ Available CALL strikes: {available_call_strikes[:10]}{'...' if len(available_call_strikes) > 10 else ''}")
+                self.execution_log.append(f"  ⚠️ Available PUT strikes: {available_put_strikes[:10]}{'...' if len(available_put_strikes) > 10 else ''}")
+                error_msg = f"Strike ${strike_price} not found in chain for {expiry_date}"
+                self.execution_log.append(f"  ❌ {error_msg}")
                 return {"success": False, "error": error_msg}
             
-            self.execution_log.append(f"✅ STEP 4 Complete: Strike price ${strike_price} verified")
-            return {"success": True}
-            
+        except ImportError:
+            error_msg = "yfinance is not installed. Install with: pip install yfinance"
+            self.execution_log.append(f"  ❌ {error_msg}")
+            return {"success": False, "error": error_msg}
         except Exception as e:
             error_msg = f"Exception verifying strike: {str(e)}"
             self.execution_log.append(f"❌ {error_msg}")
@@ -664,7 +635,6 @@ class TradeExecutor:
     
     def _step6_fill_order_incremental(
         self,
-        api,
         platform: str,
         ticker: str,
         expiry_date: str,
@@ -674,7 +644,15 @@ class TradeExecutor:
         quantity: int
     ) -> Dict:
         """
-        STEP 6: Attempt to fill order with incremental pricing using FILL_OR_KILL
+        STEP 6: Attempt to fill order with incremental pricing (GTC orders)
+        
+        Process:
+        1. Place order at current price
+        2. Wait 2 seconds
+        3. Check if filled
+        4. If filled → success
+        5. If not filled → cancel order, increment price, try again
+        
         Increment logic based on purchase price:
         - <= $1.00: Start at -10%, increment by $0.03 until +15%
         - $1.01-$3.00: Start at -10%, increment by $0.05 until +15%
@@ -698,12 +676,16 @@ class TradeExecutor:
         self.execution_log.append(f"  • Base price: ${purchase_price:.2f}")
         self.execution_log.append(f"  • Price range: ${start_price:.2f} (-10%) to ${end_price:.2f} (+15%)")
         self.execution_log.append(f"  • Increment: ${increment:.2f} per attempt")
-        self.execution_log.append(f"  • Order type: FILL_OR_KILL")
+        self.execution_log.append(f"  • Order type: LIMIT (GTC)")
         self.execution_log.append(f"  • Quantity: {quantity} contracts")
+        self.execution_log.append(f"  • Wait time: 2 seconds per attempt")
         self.execution_log.append("")
         
         attempts = 0
         current_price = start_price
+        
+        # Get account ID for status checks
+        account_id = self.webull_api.default_account_id if self.webull_api else None
         
         while current_price <= end_price:
             attempts += 1
@@ -718,42 +700,153 @@ class TradeExecutor:
                 f"({price_diff_pct:+.1f}% from base)"
             )
             
-            # Place FILL_OR_KILL order with timing
+            # Step 1: Place order
             attempt_start = time.time()
             order_result = self._place_order(
-                api, platform, ticker, expiry_date,
+                platform, ticker, expiry_date,
                 option_type, strike_price, limit_price, quantity,
-                fill_or_kill=True
+                fill_or_kill=False,  # GTC order
+                side="BUY"
             )
-            attempt_duration = time.time() - attempt_start
             
-            if order_result.get("filled"):
-                self.execution_log.append(f"  ✅ Order FILLED at ${limit_price:.2f}")
-                self.execution_log.append(f"  ⏱️ Attempt {attempts} took {attempt_duration:.2f}s")
-                self.execution_log.append(f"✅ STEP 6 Complete: Order filled on attempt {attempts}")
-                return {
-                    "success": True,
-                    "order_id": order_result["order_id"],
-                    "filled_price": limit_price,
-                    "attempts": attempts
-                }
-            elif order_result.get("fatal_error"):
-                # CRITICAL: Cannot confirm status - STOP IMMEDIATELY, no more retries
-                error_detail = order_result.get("error", "Fatal error")
-                self.execution_log.append(f"  ⛔ FATAL ERROR - STOPPING: {error_detail}")
-                self.execution_log.append(f"  ⏱️ Attempt {attempts} took {attempt_duration:.2f}s")
+            if not order_result.get("placed"):
+                # Order couldn't be placed
+                if order_result.get("order_valid"):
+                    # Trading hours restriction
+                    self.execution_log.append(f"     ⚠️ Trading hours restriction - try during market hours")
+                    return {
+                        "success": False,
+                        "error": "Trading hours restriction - try during market hours (9:30 AM - 4:00 PM ET)",
+                        "order_valid": True,
+                        "attempts": attempts
+                    }
+                elif order_result.get("fatal_error"):
+                    self.execution_log.append(f"     ⛔ FATAL: {order_result.get('error', 'Unknown error')}")
+                    return {
+                        "success": False,
+                        "error": order_result.get("error", "Fatal error"),
+                        "fatal_error": True,
+                        "attempts": attempts
+                    }
+                else:
+                    # Try next price
+                    self.execution_log.append(f"     ❌ Order failed: {order_result.get('error', 'Unknown')}")
+                    current_price += increment
+                    continue
+            
+            client_order_id = order_result.get("client_order_id")
+            self.execution_log.append(f"     📤 Order placed (ID: {client_order_id[:8]}...)")
+            
+            # Step 2: Wait 2 seconds
+            self.execution_log.append(f"     ⏳ Waiting 2 seconds...")
+            time.sleep(2)
+            
+            # Step 3: Check if filled
+            if self.webull_api and account_id and client_order_id:
+                status_result = self.webull_api.get_order_status(account_id, client_order_id)
+                
+                if status_result.get("success"):
+                    status = status_result.get("status")  # Can be None
+                    filled_qty = status_result.get("filled_quantity", 0)
+                    raw_response = status_result.get("raw_response", {})
+                    
+                    # Log raw response for debugging
+                    self.execution_log.append(f"     📊 Raw API response: {raw_response}")
+                    
+                    # CRITICAL: If status is None/empty, this is a fatal error
+                    if not status:
+                        self.execution_log.append(f"     ⛔ FATAL: Could not determine order status from API response")
+                        self.execution_log.append(f"     ⛔ Raw response keys: {list(raw_response.keys()) if raw_response else 'None'}")
+                        # Try to cancel the order before failing
+                        self.webull_api.cancel_option_order(account_id, client_order_id)
+                        return {
+                            "success": False,
+                            "error": f"FATAL: Order status unknown - cannot confirm order state. Raw response: {raw_response}",
+                            "fatal_error": True,
+                            "attempts": attempts
+                        }
+                    
+                    self.execution_log.append(f"     📊 Status: {status}, Filled: {filled_qty}/{quantity}")
+                    
+                    # Webull statuses: SUBMITTED, CANCELLED, FAILED, FILLED, PARTIAL_FILLED
+                    if status == "FILLED" or (status == "PARTIAL_FILLED" and filled_qty >= quantity):
+                        # Step 4: Filled → Success!
+                        attempt_duration = time.time() - attempt_start
+                        order_id = status_result.get("order_id") or client_order_id
+                        self.execution_log.append(f"  ✅ Order FILLED at ${limit_price:.2f}")
+                        self.execution_log.append(f"  ⏱️ Attempt {attempts} took {attempt_duration:.2f}s")
+                        self.execution_log.append(f"✅ STEP 6 Complete: Order filled on attempt {attempts}")
+                        return {
+                            "success": True,
+                            "order_id": str(order_id),
+                            "filled_price": limit_price,
+                            "attempts": attempts
+                        }
+                    elif status == "SUBMITTED":
+                        # Step 5: Not filled yet → Cancel and try next price
+                        self.execution_log.append(f"     ⏳ Order submitted but not filled, cancelling...")
+                        cancel_result = self.webull_api.cancel_option_order(account_id, client_order_id)
+                        if cancel_result.get("success"):
+                            self.execution_log.append(f"     🚫 Order cancelled")
+                        else:
+                            # Check if it got filled while we tried to cancel
+                            time.sleep(0.5)  # Brief wait
+                            recheck = self.webull_api.get_order_status(account_id, client_order_id)
+                            recheck_status = recheck.get("status")
+                            if recheck_status == "FILLED":
+                                attempt_duration = time.time() - attempt_start
+                                order_id = recheck.get("order_id") or client_order_id
+                                self.execution_log.append(f"  ✅ Order FILLED at ${limit_price:.2f} (filled during cancel)")
+                                self.execution_log.append(f"  ⏱️ Attempt {attempts} took {attempt_duration:.2f}s")
+                                return {
+                                    "success": True,
+                                    "order_id": str(order_id),
+                                    "filled_price": limit_price,
+                                    "attempts": attempts
+                                }
+                            self.execution_log.append(f"     ⚠️ Cancel may have failed: {cancel_result.get('error', 'Unknown')}")
+                    elif status == "PARTIAL_FILLED":
+                        # Partially filled - cancel remainder and try next price
+                        self.execution_log.append(f"     ⏳ Partially filled ({filled_qty}/{quantity}), cancelling remainder...")
+                        self.webull_api.cancel_option_order(account_id, client_order_id)
+                    elif status in ("CANCELLED", "FAILED"):
+                        self.execution_log.append(f"     ❌ Order {status}")
+                    else:
+                        # Unknown status - FATAL ERROR
+                        self.execution_log.append(f"     ⛔ FATAL: Unrecognized status '{status}'")
+                        self.webull_api.cancel_option_order(account_id, client_order_id)
+                        return {
+                            "success": False,
+                            "error": f"FATAL: Unrecognized order status '{status}'",
+                            "fatal_error": True,
+                            "attempts": attempts
+                        }
+                else:
+                    # Status check API call failed - FATAL ERROR
+                    error_msg = status_result.get('error', 'Unknown')
+                    self.execution_log.append(f"     ⛔ FATAL: Status check failed: {error_msg}")
+                    # Try to cancel the order before failing
+                    self.webull_api.cancel_option_order(account_id, client_order_id)
+                    return {
+                        "success": False,
+                        "error": f"FATAL: Cannot check order status - {error_msg}",
+                        "fatal_error": True,
+                        "attempts": attempts
+                    }
+            else:
+                # Missing API or account - FATAL ERROR
+                self.execution_log.append(f"     ⛔ FATAL: Cannot check status - Webull API or account not configured")
                 return {
                     "success": False,
-                    "error": f"FATAL: {error_detail}",
+                    "error": "FATAL: Webull API or account not configured",
                     "fatal_error": True,
                     "attempts": attempts
                 }
-            else:
-                error_detail = order_result.get("error", "Not filled")
-                self.execution_log.append(f"     Not filled: {error_detail}")
-                self.execution_log.append(f"     ⏱️ Attempt {attempts} took {attempt_duration:.2f}s")
             
-            # Increase price by increment
+            attempt_duration = time.time() - attempt_start
+            self.execution_log.append(f"     ⏱️ Attempt {attempts} took {attempt_duration:.2f}s")
+            
+            # Increase price by increment for next attempt
             current_price += increment
         
         error_msg = f"Order not filled after {attempts} attempts (reached +15% limit at ${end_price:.2f})"
@@ -762,7 +855,6 @@ class TradeExecutor:
     
     def _place_order(
         self,
-        api,
         platform: str,
         ticker: str,
         expiry_date: str,
@@ -770,105 +862,78 @@ class TradeExecutor:
         strike_price: float,
         limit_price: float,
         quantity: int,
-        fill_or_kill: bool = False
+        fill_or_kill: bool = False,
+        side: str = "BUY"
     ) -> Dict:
         """
-        Helper to place an options order via SnapTrade proxy
-        Uses FOK (Fill or Kill) with --useLastAccount for fast execution
+        Helper to place an options order via Webull API
         
         Args:
-            fill_or_kill: If True, use FOK time_in_force (proxy handles FOK simulation)
+            platform: Trading platform ('webull' or 'etrade')
+            fill_or_kill: If True, use DAY time_in_force (Webull doesn't support FOK for options)
+            side: "BUY" or "SELL"
         
         Returns:
-            Dict with 'filled' (bool), 'order_id', 'filled_price', 'error'
+            Dict with:
+            - 'placed' (bool): True if order was submitted successfully
+            - 'client_order_id': The order ID for status checks
+            - 'error': Error message if placement failed
+            - 'order_valid': True if order structure is valid but can't be placed (e.g., trading hours)
+            - 'fatal_error': True if unrecoverable error
         """
         try:
-            import requests
+            if not self.webull_api:
+                return {"placed": False, "error": "Webull API not configured", "fatal_error": True}
             
-            # Get proxy URL from database
-            proxy_url = self.db.get_setting("snaptrade_proxy_url", "")
+            if not self.webull_api.trade_client:
+                return {"placed": False, "error": "Webull not authenticated", "fatal_error": True}
             
-            if not proxy_url:
-                self.execution_log.append(f"  • ❌ SnapTrade proxy URL not configured")
-                return {"filled": False, "error": "SnapTrade proxy URL not configured"}
-                
-            # Build payload for proxy's /api/trade/option endpoint
-            # Use empty account_id to trigger --useLastAccount in proxy
-            payload = {
-                "ticker": ticker.upper(),
-                "strike": strike_price,
-                "exp": expiry_date,  # Format: YYYY-MM-DD
-                "optionType": option_type.upper(),  # CALL or PUT
-                        "action": "BUY",
-                "contracts": quantity,
-                "orderType": "Limit",
-                "limitPrice": limit_price,
-                "tif": "FOK" if fill_or_kill else "GTC",  # FOK triggers proxy's FOK simulation
-                "account_id": ""  # Empty = use --useLastAccount
-            }
+            # Get default account ID
+            account_id = self.webull_api.default_account_id
+            if not account_id:
+                # Try to get accounts
+                accounts_result = self.webull_api.get_accounts()
+                if accounts_result.get("success") and accounts_result.get("accounts"):
+                    account_id = accounts_result["accounts"][0].get("account_id")
+                    self.webull_api.default_account_id = account_id
+                else:
+                    return {"placed": False, "error": "No Webull account available", "fatal_error": True}
             
-            self.execution_log.append(f"  • 📤 Placing via proxy: {ticker} {strike_price} {option_type} @ ${limit_price:.2f}")
-            self.execution_log.append(f"  • Using --useLastAccount, TIF: {'FOK' if fill_or_kill else 'GTC'}")
-            
-            # Call proxy endpoint
-            response = requests.post(
-                f"{proxy_url}/api/trade/option",
-                json=payload,
-                timeout=90  # Longer timeout for FOK (includes 3s wait + status check + cancel)
+            # Place option order via Webull API
+            result = self.webull_api.place_option_order(
+                account_id=account_id,
+                symbol=ticker.upper(),
+                strike_price=str(strike_price),
+                init_exp_date=expiry_date,
+                option_type=option_type.upper(),
+                side=side,
+                quantity=quantity,
+                order_type="LIMIT",
+                limit_price=str(limit_price),
+                time_in_force="GTC"  # Always use GTC for Step 6
             )
             
-            result = response.json()
-            
-            # Check response
-            if response.status_code == 200 and result.get("success"):
-                # Order placed and filled successfully
-                order_id = result.get("order_id", "unknown")
-                self.execution_log.append(f"  • ✅ Order FILLED - Order ID: {order_id}")
+            if result.get("success"):
+                client_order_id = result.get("client_order_id", "")
                 return {
-                    "filled": True,
-                    "order_id": str(order_id),
-                    "filled_price": limit_price
+                    "placed": True,
+                    "client_order_id": client_order_id,
+                    "limit_price": limit_price
                 }
             else:
-                # Check if it's a FOK cancellation (expected behavior, not an error)
                 error_msg = result.get("error", "Unknown error")
-                order_id = result.get("order_id")
                 
-                if "fok" in error_msg.lower() and "cancel" in error_msg.lower():
-                    # FOK order was placed but not filled, then cancelled - this is expected
-                    self.execution_log.append(f"  • ⚠️ FOK not filled - cancelled (Order ID: {order_id})")
-                    return {
-                        "filled": False,
-                        "error": "FOK order not filled",
-                        "order_id": str(order_id) if order_id else None
-                    }
+                # Check for trading hours restriction
+                if result.get("order_valid") or "trading hours" in error_msg.lower() or "CORE_TIME" in error_msg:
+                    return {"placed": False, "error": "Trading hours restriction", "order_valid": True}
                 elif "buying power" in error_msg.lower() or "insufficient" in error_msg.lower():
-                    # Insufficient funds
-                    self.execution_log.append(f"  • ❌ Insufficient buying power")
-                    return {"filled": False, "error": "Insufficient buying power"}
-                elif "symbol" in error_msg.lower() and "invalid" in error_msg.lower():
-                    # Invalid symbol
-                    self.execution_log.append(f"  • ❌ Invalid symbol")
-                    return {"filled": False, "error": f"Invalid symbol: {error_msg}"}
-                elif "cannot confirm" in error_msg.lower():
-                    # CRITICAL: Cannot confirm order status - MUST STOP all retries
-                    self.execution_log.append(f"  • ⛔ FATAL: Cannot confirm order status - STOPPING ALL RETRIES")
-                    self.execution_log.append(f"  • Check brokerage account manually!")
-                    return {"filled": False, "error": error_msg, "fatal_error": True}
+                    return {"placed": False, "error": "Insufficient buying power", "fatal_error": True}
                 else:
-                    # Other error
-                    self.execution_log.append(f"  • ❌ Order failed: {error_msg}")
-                    return {"filled": False, "error": error_msg}
+                    return {"placed": False, "error": error_msg}
                 
-        except requests.exceptions.Timeout:
-            self.execution_log.append(f"  • ❌ Request timed out")
-            return {"filled": False, "error": "Request timed out"}
-        except requests.exceptions.ConnectionError:
-            self.execution_log.append(f"  • ❌ Cannot connect to proxy")
-            return {"filled": False, "error": "Cannot connect to proxy server"}
         except Exception as e:
-            self.execution_log.append(f"  • ❌ Exception: {str(e)}")
-            return {"filled": False, "error": str(e)}
+            import traceback
+            return {"placed": False, "error": str(e), "traceback": traceback.format_exc()}
     
     def _step7_place_take_profit_order(
         self,
@@ -892,7 +957,6 @@ class TradeExecutor:
         - Use filter's profitMultiplier (instead of 1.3x)
         """
         import math
-        import requests
         import json
         
         # Load selling filters from database
@@ -942,69 +1006,52 @@ class TradeExecutor:
         self.execution_log.append(f"  • Sell price (rounded UP): ${sell_price:.2f}")
         self.execution_log.append(f"  • Expected profit: {((sell_price / filled_price) - 1) * 100:.1f}%")
         
-        # Get proxy URL
-        proxy_url = self.db.get_setting("snaptrade_proxy_url", "")
-        
-        if not proxy_url:
-            self.execution_log.append(f"  • ❌ SnapTrade proxy URL not configured")
-            return {"success": False, "error": "SnapTrade proxy URL not configured"}
-        
-        # Build payload for SELL order (not FOK, just GTC limit order)
-        payload = {
-            "ticker": ticker.upper(),
-            "strike": strike_price,
-            "exp": expiry_date,
-            "optionType": option_type.upper(),
-            "action": "SELL",  # SELL to close position
-            "contracts": sell_quantity,
-            "orderType": "Limit",
-            "limitPrice": sell_price,
-            "tif": "GTC",  # Good Til Cancelled - leave open until filled
-            "account_id": ""  # Use --useLastAccount
-        }
-        
-        self.execution_log.append(f"  • 📤 Placing SELL order: {ticker} {strike_price} {option_type}")
+        # Use _place_order with side="SELL" to place the take-profit order via Webull
+        self.execution_log.append(f"  • 📤 Placing SELL order via Webull: {ticker} ${strike_price} {option_type}")
         self.execution_log.append(f"  • Action: SELL {sell_quantity} @ ${sell_price:.2f} (GTC)")
         
-        try:
-            response = requests.post(
-                f"{proxy_url}/api/trade/option",
-                json=payload,
-                timeout=60
-            )
-            
-            result = response.json()
-            
-            if response.status_code == 200 and result.get("success"):
-                order_id = result.get("order_id", "unknown")
-                self.execution_log.append(f"  • ✅ Take-profit SELL order placed!")
-                self.execution_log.append(f"  • Order ID: {order_id}")
-                self.execution_log.append(f"✅ STEP 7 Complete: Sell order placed for {sell_quantity} contracts @ ${sell_price:.2f}")
-                return {
-                    "success": True,
-                    "order_id": str(order_id),
-                    "sell_quantity": sell_quantity,
-                    "sell_price": sell_price
-                }
-            else:
-                error_msg = result.get("error", "Unknown error")
-                self.execution_log.append(f"  • ❌ Failed to place sell order: {error_msg}")
-                return {
-                    "success": False,
-                    "error": error_msg,
-                    "sell_quantity": sell_quantity,
-                    "sell_price": sell_price
-                }
-                
-        except requests.exceptions.Timeout:
-            self.execution_log.append(f"  • ❌ Request timed out")
-            return {"success": False, "error": "Request timed out"}
-        except requests.exceptions.ConnectionError:
-            self.execution_log.append(f"  • ❌ Cannot connect to proxy")
-            return {"success": False, "error": "Cannot connect to proxy server"}
-        except Exception as e:
-            self.execution_log.append(f"  • ❌ Exception: {str(e)}")
-            return {"success": False, "error": str(e)}
+        order_result = self._place_order(
+            platform="webull",
+            ticker=ticker,
+            expiry_date=expiry_date,
+            option_type=option_type,
+            strike_price=strike_price,
+            limit_price=sell_price,
+            quantity=sell_quantity,
+            fill_or_kill=False,  # GTC for take-profit
+            side="SELL"
+        )
+        
+        if order_result.get("placed"):
+            order_id = order_result.get("client_order_id", "unknown")
+            self.execution_log.append(f"  • ✅ Take-profit SELL order placed!")
+            self.execution_log.append(f"  • Order ID: {order_id}")
+            self.execution_log.append(f"✅ STEP 7 Complete: Sell order placed for {sell_quantity} contracts @ ${sell_price:.2f}")
+            return {
+                "success": True,
+                "order_id": str(order_id),
+                "sell_quantity": sell_quantity,
+                "sell_price": sell_price
+            }
+        elif order_result.get("order_valid"):
+            # Trading hours restriction but order structure is valid
+            self.execution_log.append(f"  • ⚠️ Trading hours restriction - sell order will be placed during market hours")
+            return {
+                "success": False,
+                "error": "Trading hours restriction - sell order cannot be placed outside market hours",
+                "order_valid": True,
+                "sell_quantity": sell_quantity,
+                "sell_price": sell_price
+            }
+        else:
+            error_msg = order_result.get("error", "Unknown error")
+            self.execution_log.append(f"  • ❌ Failed to place sell order: {error_msg}")
+            return {
+                "success": False,
+                "error": error_msg,
+                "sell_quantity": sell_quantity,
+                "sell_price": sell_price
+            }
     
     def _fail(self, error: str, step: int, execution_id: int = None) -> Dict:
         """Record failure and return result"""

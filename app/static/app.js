@@ -219,6 +219,11 @@ function switchTab(tabName, eventElement) {
     const tabElement = document.getElementById(`${tabName}-tab`);
     if (tabElement) {
         tabElement.classList.add('active');
+        
+        // Initialize module-specific logic when tab is opened
+        if (tabName === 'webull' && typeof webullInit === 'function') {
+            webullInit();
+        }
     } else {
         console.error(`Tab element not found: ${tabName}-tab`);
     }
@@ -2417,13 +2422,22 @@ async function loadChannels() {
         const response = await fetch('/api/channels');
         const data = await response.json();
         
+        console.log('[Channel Management] API response:', data);
+        console.log('[Channel Management] Channels count:', data.channels ? data.channels.length : 0);
+        
         if (data.channels && data.channels.length > 0) {
             channelsList.innerHTML = '';
             
             for (const channel of data.channels) {
+                console.log('[Channel Management] Creating card for:', channel.channel_name);
+                try {
                 const card = await createChannelCard(channel);
                 channelsList.appendChild(card);
+                } catch (cardError) {
+                    console.error('[Channel Management] Error creating card for', channel.channel_name, ':', cardError);
             }
+            }
+            console.log('[Channel Management] Total cards created:', channelsList.children.length);
         } else {
             channelsList.innerHTML = '<p class="loading">No channels created yet. Use the Prompt Builder to create one!</p>';
         }

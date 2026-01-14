@@ -51,10 +51,10 @@ class IPCBridge {
       // Only try to parse lines that look like JSON (start with { or [)
       const trimmed = line.trim();
       if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-        try {
-          const response = JSON.parse(line);
-          this.handleResponse(response);
-        } catch (e) {
+      try {
+        const response = JSON.parse(line);
+        this.handleResponse(response);
+      } catch (e) {
           // Only log if it actually looked like JSON but failed to parse
           if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
             console.error('[IPC] Failed to parse JSON response:', line.substring(0, 100), e.message);

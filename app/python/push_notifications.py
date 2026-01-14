@@ -301,7 +301,17 @@ class PushNotificationManager:
             logger.info(f"Push notification sent: {title}")
             return True
         except Exception as e:
+            error_str = str(e)
             logger.error(f"Error sending push notification: {e}")
+            
+            # Check if subscription is expired/unregistered (410 Gone)
+            # If so, remove it from the database to avoid future delays
+            if "410" in error_str or "Gone" in error_str or "Unregistered" in error_str:
+                endpoint = subscription_data.get("endpoint") if isinstance(subscription_data, dict) else None
+                if endpoint:
+                    logger.warning(f"Removing expired subscription: {endpoint[:50]}...")
+                    self.remove_subscription(endpoint)
+            
             import traceback
             traceback.print_exc()
             return False

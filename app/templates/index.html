@@ -59,6 +59,7 @@
                     <button class="more-modules-item" onclick="switchTab('channels', this); hideMoreModules();">📡 Channels</button>
                     <button class="more-modules-item" onclick="switchTab('tradingview-executor', this); hideMoreModules();">📺 TradingView Executor</button>
                     <button class="more-modules-item" onclick="switchTab('etrade', this); hideMoreModules();">📈 E*TRADE</button>
+                    <button class="more-modules-item" onclick="switchTab('webull', this); hideMoreModules();">📊 Webull</button>
                     <button class="more-modules-item" onclick="switchTab('discord', this); hideMoreModules();">💬 Discord Webhook</button>
                     <button class="more-modules-item" onclick="switchTab('notifications', this); hideMoreModules();">🔔 Notifications</button>
                     <button class="more-modules-item" onclick="switchTab('settings', this); hideMoreModules();">⚙️ Settings</button>
@@ -175,20 +176,20 @@
                 <details class="collapse-section">
                     <summary>Manual Signal Processing</summary>
                     <div class="accordion-body">
-                        <form id="test-signal-form" onsubmit="sendTestSignal(event)">
-                            <div class="form-group">
-                                <label for="test-channel">Channel Name (Title) <span style="font-size: 0.8rem; color: #6b7280; font-weight: normal;">(optional)</span></label>
-                                <input type="text" id="test-channel" placeholder="e.g., crypto_alerts" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
-                            </div>
-                            <div class="form-group">
-                                <label for="test-signal">Signal Content</label>
+                <form id="test-signal-form" onsubmit="sendTestSignal(event)">
+                    <div class="form-group">
+                        <label for="test-channel">Channel Name (Title) <span style="font-size: 0.8rem; color: #6b7280; font-weight: normal;">(optional)</span></label>
+                        <input type="text" id="test-channel" placeholder="e.g., crypto_alerts" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="test-signal">Signal Content</label>
                                 <textarea id="test-signal" rows="4" placeholder="e.g., BUY TSLA 450 C 2.00" required inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
-                            </div>
-                            <div class="sticky-cta">
-                                <button type="submit" class="btn btn-primary">📤 Send Test Signal</button>
-                            </div>
-                        </form>
-                        <div id="test-result" class="result-box"></div>
+                    </div>
+                    <div class="sticky-cta">
+                        <button type="submit" class="btn btn-primary">📤 Send Test Signal</button>
+                    </div>
+                </form>
+                <div id="test-result" class="result-box"></div>
                     </div>
                 </details>
             </section>
@@ -893,6 +894,156 @@
             </section>
         </div>
 
+        <!-- Webull Tab -->
+        <div id="webull-tab" class="tab-content">
+            <section class="section">
+                <h2>🔐 Connect to Webull</h2>
+                <p class="help-text">Enter your Webull API credentials. Get your App Key and App Secret from <a href="https://www.webull.com" target="_blank">Webull Developer Portal</a>.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="webull-app-key">App Key <span style="color: red;">*</span></label>
+                        <input type="text" id="webull-app-key" placeholder="Enter your Webull App Key" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-app-secret">App Secret <span style="color: red;">*</span></label>
+                        <input type="password" id="webull-app-secret" placeholder="Enter your Webull App Secret" inputmode="text" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                </div>
+                <p class="help-text" id="webull-config-status">Not set</p>
+                <button class="btn btn-primary" onclick="webullSaveConfig()">💾 Save API Keys</button>
+                <div id="webull-status" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="webull-accounts-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📋 Accounts</h2>
+                    <button class="btn btn-secondary" onclick="webullLoadAccounts()">🔄 Refresh Accounts</button>
+                        </div>
+                <div id="webull-accounts-list" style="margin-top: 10px;"></div>
+            </section>
+
+            <section class="section" id="webull-options-section" style="display: none;">
+                <h2>📊 Place Options Order</h2>
+                <p class="help-text">Place options trades using Webull SDK. All fields are required.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="webull-option-account">Account <span style="color: red;">*</span></label>
+                        <select id="webull-option-account" style="width: 100%;">
+                            <option value="">-- Select Account --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-option-symbol">Symbol <span style="color: red;">*</span></label>
+                        <input type="text" id="webull-option-symbol" placeholder="IREN" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-option-strike">Strike Price <span style="color: red;">*</span></label>
+                        <input type="number" id="webull-option-strike" step="0.01" placeholder="50.0" inputmode="decimal" autocomplete="off">
+                </div>
+                    <div class="form-group">
+                        <label for="webull-option-expiration">Expiration Date <span style="color: red;">*</span></label>
+                        <input type="date" id="webull-option-expiration" placeholder="2026-01-16" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-option-type">Option Type <span style="color: red;">*</span></label>
+                        <select id="webull-option-type">
+                            <option value="CALL">CALL</option>
+                            <option value="PUT">PUT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-option-side">Side <span style="color: red;">*</span></label>
+                        <select id="webull-option-side">
+                            <option value="BUY">BUY</option>
+                            <option value="SELL">SELL</option>
+                        </select>
+                </div>
+                    <div class="form-group">
+                        <label for="webull-option-quantity">Quantity <span style="color: red;">*</span></label>
+                        <input type="number" id="webull-option-quantity" min="1" value="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-option-order-type">Order Type <span style="color: red;">*</span></label>
+                        <select id="webull-option-order-type" onchange="webullToggleLimitPrice('option')">
+                            <option value="LIMIT">LIMIT</option>
+                            <option value="MARKET">MARKET</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="webull-option-limit-price-group">
+                        <label for="webull-option-limit-price">Limit Price <span style="color: red;">*</span></label>
+                        <input type="number" id="webull-option-limit-price" step="0.01" placeholder="2.00" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-option-time-in-force">Time in Force <span style="color: red;">*</span></label>
+                        <select id="webull-option-time-in-force">
+                            <option value="GTC">GTC (Good Till Cancelled)</option>
+                            <option value="DAY">DAY</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="webullPlaceOptionOrder()">🚀 Place Options Order</button>
+                <div id="webull-option-result" style="margin-top: 20px;"></div>
+            </section>
+
+            <section class="section" id="webull-equity-section" style="display: none;">
+                <h2>📈 Place Equity Order</h2>
+                <p class="help-text">Place stock/equity trades using Webull SDK. All fields are required.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="webull-equity-account">Account <span style="color: red;">*</span></label>
+                        <select id="webull-equity-account" style="width: 100%;">
+                            <option value="">-- Select Account --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-equity-symbol">Symbol <span style="color: red;">*</span></label>
+                        <input type="text" id="webull-equity-symbol" placeholder="AAPL" style="text-transform: uppercase;" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-equity-side">Side <span style="color: red;">*</span></label>
+                        <select id="webull-equity-side">
+                            <option value="BUY">BUY</option>
+                            <option value="SELL">SELL</option>
+                        </select>
+                </div>
+                    <div class="form-group">
+                        <label for="webull-equity-quantity">Quantity <span style="color: red;">*</span></label>
+                        <input type="number" id="webull-equity-quantity" min="1" value="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-equity-order-type">Order Type <span style="color: red;">*</span></label>
+                        <select id="webull-equity-order-type" onchange="webullToggleLimitPrice('equity')">
+                            <option value="LIMIT">LIMIT</option>
+                            <option value="MARKET">MARKET</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="webull-equity-limit-price-group">
+                        <label for="webull-equity-limit-price">Limit Price <span style="color: red;">*</span></label>
+                        <input type="number" id="webull-equity-limit-price" step="0.01" placeholder="150.00" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-equity-time-in-force">Time in Force <span style="color: red;">*</span></label>
+                        <select id="webull-equity-time-in-force">
+                            <option value="GTC">GTC (Good Till Cancelled)</option>
+                            <option value="DAY">DAY</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webull-equity-trading-session">Trading Session <span style="color: red;">*</span></label>
+                        <select id="webull-equity-trading-session" onchange="webullHandleTradingSession()">
+                            <option value="REGULAR">Regular Hours (9:30 AM - 4:00 PM ET)</option>
+                            <option value="EXTENDED">Extended Hours (Pre/Post Market)</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="help-text" id="webull-equity-session-info" style="margin-bottom: 15px; color: #666;">
+                    ℹ️ <strong>Regular Hours:</strong> Submit during 9:30 AM - 4:00 PM ET. Market & Limit orders allowed.
+                </p>
+                <button class="btn btn-primary" onclick="webullPlaceEquityOrder()">🚀 Place Equity Order</button>
+                <div id="webull-equity-result" style="margin-top: 20px;"></div>
+            </section>
+        </div>
+
         <!-- X (Twitter) Tab -->
         <div id="x-tab" class="tab-content">
             <!-- Analytics Dashboard -->
@@ -978,118 +1129,146 @@
                 <h2>🔔 Push Notifications</h2>
                 <p class="help-text">Enable push notifications to receive alerts on your device (iOS 16.4+ and Android supported).</p>
                 
-                <div class="form-group">
-                    <label>PWA Installation Status:</label>
-                    <div class="setting-value">
-                        <strong>Status:</strong> <span id="pwa-install-status">Checking...</span>
+                <!-- Apple Push Notification Section -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🍎 Apple Push Notification</summary>
+                    <div class="accordion-body">
+                        <!-- Subscription Status -->
+                        <details class="collapse-section" style="margin-bottom: 15px;">
+                            <summary>📊 Subscription Status</summary>
+                            <div class="accordion-body">
+                                <div class="form-group">
+                                    <label>PWA Installation Status:</label>
+                                    <div class="setting-value">
+                                        <strong>Status:</strong> <span id="pwa-install-status">Checking...</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Notification Permission:</label>
+                                    <div class="setting-value">
+                                        <strong>Status:</strong> <span id="notification-permission-status">Checking...</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Subscription Status:</label>
+                                    <div class="setting-value">
+                                        <strong>Status:</strong> <span id="subscription-status">Checking...</span>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 20px;">
+                                    <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToNotifications()">🔔 Subscribe to Notifications</button>
+                                    <button class="btn btn-secondary" id="unsubscribe-btn" onclick="unsubscribeFromNotifications()" style="display: none;">❌ Unsubscribe</button>
+                                </div>
+
+                                <div id="notification-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+                            </div>
+                        </details>
+
+                        <!-- Installation Guide -->
+                        <details class="collapse-section" style="margin-bottom: 15px;">
+                            <summary>📱 Installation Guide</summary>
+                            <div class="accordion-body">
+                                <div style="padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                                    <h3 style="margin-top: 0;">📱 How to Install on iPhone (iOS 16.4+)</h3>
+                                    <ol class="help-list">
+                                        <li><strong>Open in Safari:</strong> Make sure you're using Safari browser (not Chrome)</li>
+                                        <li><strong>Add to Home Screen:</strong> Tap the Share button (📤) → "Add to Home Screen" → "Add"</li>
+                                        <li><strong>Open from Home Screen:</strong> Tap the TradeIQ icon on your home screen (NOT from Safari)</li>
+                                        <li><strong>Subscribe:</strong> Come back to this tab and click "Subscribe to Notifications"</li>
+                                        <li><strong>Allow Permission:</strong> When prompted, tap "Allow"</li>
+                                    </ol>
+                                    <p style="margin-bottom: 0;"><strong>⚠️ Important:</strong> Push notifications only work when the app is installed as a PWA and opened from the home screen icon. They will NOT work if opened directly in Safari.</p>
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- Test Notification -->
+                        <details class="collapse-section" style="margin-bottom: 15px;">
+                            <summary>✅ Test Notification</summary>
+                            <div class="accordion-body">
+                                <div style="padding: 15px; background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 4px;">
+                                    <p>Send yourself a test notification to verify everything is working:</p>
+                                    <button class="btn btn-success" onclick="sendTestNotification()">📤 Send Test Notification</button>
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- VAPID Keys Configuration -->
+                        <details class="collapse-section" style="margin-bottom: 15px;">
+                            <summary>🔐 VAPID Keys Configuration</summary>
+                            <div class="accordion-body">
+                                <p>VAPID keys are required for push notifications. Generate new keys or use existing ones.</p>
+                                
+                                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-primary" onclick="generateVapidKeys()">🔑 Generate New VAPID Keys</button>
+                                    <button class="btn btn-secondary" onclick="loadVapidKeys()">📥 Load Existing Keys</button>
+                                    <button class="btn btn-success" onclick="testVapidKeys()">🧪 Test VAPID Keys</button>
+                                </div>
+
+                                <form id="vapid-keys-form" onsubmit="saveVapidKeys(event)" style="margin-top: 20px;">
+                                    <div class="form-group">
+                                        <label for="vapid-private-key">Private Key (PEM format)</label>
+                                        <textarea id="vapid-private-key" rows="6" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----" style="width: 100%; font-family: monospace; font-size: 0.9em;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                                        <p class="help-text">Keep this secret! Never share or commit to git.</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="vapid-public-key">Public Key (PEM format)</label>
+                                        <textarea id="vapid-public-key" rows="6" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----" style="width: 100%; font-family: monospace; font-size: 0.9em;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
+                                        <p class="help-text">This key is safe to share. Used by browsers for subscription.</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="vapid-email">Email (for VAPID claims)</label>
+                                        <input type="text" id="vapid-email" placeholder="mailto:your-email@example.com" style="width: 100%;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+                                        <p class="help-text">Must start with "mailto:" (e.g., mailto:tradeiq@example.com)</p>
+                                    </div>
+
+                                    <div class="sticky-cta">
+                                        <button type="submit" class="btn btn-primary">💾 Save VAPID Keys</button>
+                                    </div>
+                                </form>
+
+                                <div id="vapid-keys-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+
+                                <div id="vapid-keys-status" style="margin-top: 15px; padding: 10px; background: #f3f4f6; border-radius: 4px; display: none;">
+                                    <strong>Current Status:</strong> <span id="vapid-status-text">Checking...</span>
+                                </div>
+                            </div>
+                        </details>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Notification Permission:</label>
-                    <div class="setting-value">
-                        <strong>Status:</strong> <span id="notification-permission-status">Checking...</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Subscription Status:</label>
-                    <div class="setting-value">
-                        <strong>Status:</strong> <span id="subscription-status">Checking...</span>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToNotifications()">🔔 Subscribe to Notifications</button>
-                    <button class="btn btn-secondary" id="unsubscribe-btn" onclick="unsubscribeFromNotifications()" style="display: none;">❌ Unsubscribe</button>
-                </div>
-
-                <div id="notification-result" class="result-box" style="margin-top: 15px; display: none;"></div>
-
-                <div style="margin-top: 30px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
-                    <h3 style="margin-top: 0;">📱 How to Install on iPhone (iOS 16.4+)</h3>
-                    <ol class="help-list">
-                        <li><strong>Open in Safari:</strong> Make sure you're using Safari browser (not Chrome)</li>
-                        <li><strong>Add to Home Screen:</strong> Tap the Share button (📤) → "Add to Home Screen" → "Add"</li>
-                        <li><strong>Open from Home Screen:</strong> Tap the TradeIQ icon on your home screen (NOT from Safari)</li>
-                        <li><strong>Subscribe:</strong> Come back to this tab and click "Subscribe to Notifications"</li>
-                        <li><strong>Allow Permission:</strong> When prompted, tap "Allow"</li>
-                    </ol>
-                    <p style="margin-bottom: 0;"><strong>⚠️ Important:</strong> Push notifications only work when the app is installed as a PWA and opened from the home screen icon. They will NOT work if opened directly in Safari.</p>
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 4px;">
-                    <h3 style="margin-top: 0;">✅ Test Notification</h3>
-                    <p>Send yourself a test notification to verify everything is working:</p>
-                    <button class="btn btn-success" onclick="sendTestNotification()">📤 Send Test Notification</button>
-                </div>
+                </details>
 
                 <!-- Android Native Notifications Section -->
-                <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-left: 4px solid #0284c7; border-radius: 8px;">
-                    <h3 style="margin-top: 0; color: #0284c7;">🤖 Android Native Notifications</h3>
-                    <p style="margin-bottom: 15px;">Enable native Android notifications that work directly on your phone without PWA installation.</p>
-                    
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" id="android-notifications-enabled" onchange="toggleAndroidNotifications()" style="width: 20px; height: 20px; cursor: pointer;">
-                            <span style="font-weight: 600;">Enable Android Notifications</span>
-                        </label>
-                        <p class="help-text" style="margin-top: 5px;">When enabled, you'll receive native Android notifications for trade signals and alerts.</p>
-                    </div>
-
-                    <div id="android-notifications-status" style="margin-bottom: 15px; padding: 10px; background: #e0f2fe; border-radius: 4px;">
-                        <strong>Status:</strong> <span id="android-notifications-status-text">Checking...</span>
-                    </div>
-
-                    <div style="margin-top: 15px;">
-                        <button class="btn btn-success" onclick="sendAndroidTestNotification()" id="android-test-btn" style="width: 100%;">
-                            📤 Send Test Android Notification
-                        </button>
-                    </div>
-
-                    <div id="android-notification-result" class="result-box" style="margin-top: 15px; display: none;"></div>
-                </div>
-
-                <div style="margin-top: 30px; padding: 15px; background: #e0e7ff; border-left: 4px solid #4c77ec; border-radius: 4px;">
-                    <h3 style="margin-top: 0;">🔐 VAPID Keys Configuration</h3>
-                    <p>VAPID keys are required for push notifications. Generate new keys or use existing ones.</p>
-                    
-                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="generateVapidKeys()">🔑 Generate New VAPID Keys</button>
-                        <button class="btn btn-secondary" onclick="loadVapidKeys()">📥 Load Existing Keys</button>
-                        <button class="btn btn-success" onclick="testVapidKeys()">🧪 Test VAPID Keys</button>
-                    </div>
-
-                    <form id="vapid-keys-form" onsubmit="saveVapidKeys(event)" style="margin-top: 20px;">
-                        <div class="form-group">
-                            <label for="vapid-private-key">Private Key (PEM format)</label>
-                            <textarea id="vapid-private-key" rows="6" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----" style="width: 100%; font-family: monospace; font-size: 0.9em;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
-                            <p class="help-text">Keep this secret! Never share or commit to git.</p>
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🤖 Android Native Notifications</summary>
+                    <div class="accordion-body">
+                        <p style="margin-bottom: 15px;">Enable native Android notifications that work directly on your phone without PWA installation.</p>
+                        
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="android-notifications-enabled" onchange="toggleAndroidNotifications()" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 600;">Enable Android Notifications</span>
+                            </label>
+                            <p class="help-text" style="margin-top: 5px;">When enabled, you'll receive native Android notifications for trade signals and alerts.</p>
                         </div>
 
-                        <div class="form-group">
-                            <label for="vapid-public-key">Public Key (PEM format)</label>
-                            <textarea id="vapid-public-key" rows="6" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----" style="width: 100%; font-family: monospace; font-size: 0.9em;" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></textarea>
-                            <p class="help-text">This key is safe to share. Used by browsers for subscription.</p>
+                        <div id="android-notifications-status" style="margin-bottom: 15px; padding: 10px; background: #e0f2fe; border-radius: 4px;">
+                            <strong>Status:</strong> <span id="android-notifications-status-text">Checking...</span>
                         </div>
 
-                        <div class="form-group">
-                            <label for="vapid-email">Email (for VAPID claims)</label>
-                            <input type="email" id="vapid-email" placeholder="mailto:your-email@example.com" style="width: 100%;" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false">
-                            <p class="help-text">Must start with "mailto:" (e.g., mailto:tradeiq@example.com)</p>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-success" onclick="sendAndroidTestNotification()" id="android-test-btn" style="width: 100%;">
+                                📤 Send Test Android Notification
+                            </button>
                         </div>
 
-                        <div class="sticky-cta">
-                            <button type="submit" class="btn btn-primary">💾 Save VAPID Keys</button>
-                        </div>
-                    </form>
-
-                    <div id="vapid-keys-result" class="result-box" style="margin-top: 15px; display: none;"></div>
-
-                    <div id="vapid-keys-status" style="margin-top: 15px; padding: 10px; background: #f3f4f6; border-radius: 4px; display: none;">
-                        <strong>Current Status:</strong> <span id="vapid-status-text">Checking...</span>
+                        <div id="android-notification-result" class="result-box" style="margin-top: 15px; display: none;"></div>
                     </div>
-                </div>
+                </details>
             </section>
         </div>
 
@@ -1098,9 +1277,11 @@
             <section class="section">
                 <h2>Configuration</h2>
                 
-                <div class="settings-grid">
-                    <div class="setting-item">
-                        <h3>🔑 OpenAI Configuration</h3>
+                <!-- OpenAI Configuration -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🔑 OpenAI Configuration</summary>
+                    <div class="accordion-body">
+                        <div class="setting-item">
                         <form id="config-form" onsubmit="updateConfig(event)">
                             <div class="form-group">
                                 <label for="config-api-key">API Key</label>
@@ -1134,10 +1315,15 @@
                         </form>
 
                         <div id="config-result" class="result-box"></div>
+                        </div>
                     </div>
+                </details>
 
-                    <div class="setting-item">
-                        <h3>📈 Trading Mode</h3>
+                <!-- Trading Mode -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>📈 Trading Mode</summary>
+                    <div class="accordion-body">
+                        <div class="setting-item">
                         <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="paper-trading-toggle" onchange="togglePaperTrading()">
@@ -1149,10 +1335,15 @@
                         <div class="setting-value" style="margin-top: 20px;">
                             <strong>Current Mode:</strong> <span id="current-trading-mode">Loading...</span>
                         </div>
+                        </div>
                     </div>
+                </details>
 
-                    <div class="setting-item">
-                        <h3>🌐 Webhook URL Configuration</h3>
+                <!-- Webhook URL Configuration -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🌐 Webhook URL Configuration</summary>
+                    <div class="accordion-body">
+                        <div class="setting-item">
                         <p class="help-text">Configure the public URL for receiving webhooks from TradingView and other services</p>
                         
                         <div style="padding: 15px; background: #fef3c7; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f59e0b;">
@@ -1184,38 +1375,45 @@
                         </div>
 
                         <div id="webhook-result" class="result-box"></div>
+                        </div>
                     </div>
+                </details>
 
-                    <details class="collapse-section">
-                        <summary>📡 API Endpoints</summary>
-                        <div class="accordion-body">
-                            <div class="setting-value">
-                                <strong>Signal Reception:</strong> <code>POST /api/signal</code>
-                            </div>
-                            <div class="setting-value">
-                                <strong>Conversational Builder:</strong> <code>POST /api/prompt-builder/start</code>
-                            </div>
-                            <div class="setting-value">
-                                <strong>Continue Conversation:</strong> <code>POST /api/prompt-builder/continue</code>
-                            </div>
-                            <p class="help-text">Use these endpoints to integrate with external systems</p>
+                <!-- API Endpoints -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>📡 API Endpoints</summary>
+                    <div class="accordion-body">
+                        <div class="setting-value">
+                            <strong>Signal Reception:</strong> <code>POST /api/signal</code>
                         </div>
-                    </details>
-
-                    <details class="collapse-section">
-                        <summary>ℹ️ System Status</summary>
-                        <div class="accordion-body">
-                            <div class="setting-value">
-                                <strong>OpenAI Status:</strong> <span id="settings-openai-status">Loading...</span>
-                            </div>
-                            <div class="setting-value">
-                                <strong>Current API Key:</strong> <span id="settings-api-key-preview">Not configured</span>
-                            </div>
+                        <div class="setting-value">
+                            <strong>Conversational Builder:</strong> <code>POST /api/prompt-builder/start</code>
                         </div>
-                    </details>
+                        <div class="setting-value">
+                            <strong>Continue Conversation:</strong> <code>POST /api/prompt-builder/continue</code>
+                        </div>
+                        <p class="help-text">Use these endpoints to integrate with external systems</p>
+                    </div>
+                </details>
 
-                    <div class="setting-item">
-                        <h3>🐦 X (Twitter) API Configuration</h3>
+                <!-- System Status -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>ℹ️ System Status</summary>
+                    <div class="accordion-body">
+                        <div class="setting-value">
+                            <strong>OpenAI Status:</strong> <span id="settings-openai-status">Loading...</span>
+                        </div>
+                        <div class="setting-value">
+                            <strong>Current API Key:</strong> <span id="settings-api-key-preview">Not configured</span>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- X (Twitter) API Configuration -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🐦 X (Twitter) API Configuration</summary>
+                    <div class="accordion-body">
+                        <div class="setting-item">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <div>
                                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
@@ -1280,10 +1478,15 @@
                                 <li>Install Tweepy: <code>pip install tweepy</code></li>
                             </ol>
                         </div>
+                        </div>
                     </div>
+                </details>
 
-                    <div class="setting-item">
-                        <h3>🤖 Grok AI Configuration</h3>
+                <!-- Grok AI Configuration -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🤖 Grok AI Configuration</summary>
+                    <div class="accordion-body">
+                        <div class="setting-item">
                         <p class="help-text" style="margin: 5px 0 15px 0;">Configure xAI's Grok for engagement prediction and trend analysis.</p>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <div>
@@ -1341,11 +1544,16 @@
                                 <strong>⚠️ Required:</strong> Grok API is required for X module. Tweet generation searches X for latest trends and facts. Analysis will fail if Grok is disabled.
                             </p>
                         </div>
+                        </div>
                     </div>
+                </details>
 
-                    <div class="setting-item">
-                        <h3>🔍 X Bot Filter Keywords</h3>
-                        <p class="help-text" style="margin: 5px 0 15px 0;">Configure keywords to automatically filter signals to the X channel. Signals with titles containing any of these keywords will be assigned to the X channel.</p>
+                <!-- X Bot Filter Keywords -->
+                <details class="collapse-section" style="margin-bottom: 20px;">
+                    <summary>🔍 X Bot Filter Keywords</summary>
+                    <div class="accordion-body">
+                        <div class="setting-item">
+                            <p class="help-text" style="margin: 5px 0 15px 0;">Configure keywords to automatically filter signals to the X channel. Signals with titles containing any of these keywords will be assigned to the X channel.</p>
                         
                         <div class="form-group">
                             <label for="x-bot-keywords">Keywords (separated by " OR ")</label>
@@ -1359,8 +1567,9 @@
                         </div>
                         
                         <div id="x-bot-keywords-result" class="result-box" style="margin-top: 15px; display: none;"></div>
+                        </div>
                     </div>
-                </div>
+                </details>
             </section>
         </div>
 
@@ -1480,6 +1689,43 @@
                 </div>
             </div>
             
+            <!-- Trading Module Selection Section -->
+            <section class="section">
+                <details class="collapse-section" open>
+                    <summary>🔌 Trading Module & Account</summary>
+                    <div class="accordion-body">
+                        <p class="help-text">Select which trading platform and account to use for execution. Orders will be placed through the selected account.</p>
+                        
+                        <!-- Module Selection -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; margin-bottom: 10px; display: block;">Select Trading Module:</label>
+                            <div id="executor-module-list" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <!-- Module cards will be rendered here -->
+                                <div style="padding: 20px; background: #f3f4f6; border-radius: 8px; text-align: center; color: #6b7280;">
+                                    Loading modules...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Account Selection (hidden until module selected) -->
+                        <div id="executor-account-section" style="display: none; margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+                            <label style="font-weight: 600; margin-bottom: 10px; display: block;">Select Account:</label>
+                            <div id="executor-account-list" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <!-- Accounts will be rendered here -->
+                            </div>
+                            <div id="executor-selected-account-info" style="margin-top: 15px; padding: 10px; background: #d1fae5; border-radius: 6px; display: none;">
+                                <!-- Selected account info will show here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Status indicator -->
+                        <div id="executor-module-status" style="margin-top: 15px; padding: 12px; border-radius: 6px; display: none;">
+                            <!-- Status messages will show here -->
+                        </div>
+                    </div>
+                </details>
+            </section>
+            
             <!-- Budget Filters Section -->
             <section class="section">
                 <details class="collapse-section" open>
@@ -1543,12 +1789,16 @@
                     <div class="accordion-body">
                         <p class="help-text">⚠️ <strong>Note:</strong> Only BUY orders are supported. The system will validate all fields, infer missing dates, and attempt to fill the order with incremental pricing (-10% to +15%).</p>
                         
-                        <div class="form-group">
-                            <label>Trading Platform <span style="color: red;">*</span></label>
-                            <select id="executor-platform">
-                                <option value="snaptrade" selected>SnapTrade</option>
-                            </select>
+                        <!-- Selected module/account display -->
+                        <div id="executor-trade-account-display" style="margin-bottom: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; border: 2px solid #f59e0b;">
+                            <p style="margin: 0; color: #92400e;">
+                                <strong>⚠️ No account selected.</strong> Please select a trading module and account in the section above before placing trades.
+                            </p>
                         </div>
+                        
+                        <!-- Hidden inputs for platform and account -->
+                        <input type="hidden" id="executor-platform" value="">
+                        <input type="hidden" id="executor-account-id" value="">
                         
                         <h3 style="margin-top: 20px;">Required Fields</h3>
                         <div class="form-grid">
@@ -1656,6 +1906,7 @@
     <script src="{{ url_for('static', filename='app.js') }}?v=3.2"></script>
     <script src="{{ url_for('static', filename='snaptrade.js') }}?v=1.0"></script>
     <script src="{{ url_for('static', filename='etrade.js') }}?v=3.0"></script>
+    <script src="{{ url_for('static', filename='webull.js') }}?v=1.0"></script>
     <script src="{{ url_for('static', filename='executor.js') }}?v=3.0"></script>
     <script src="{{ url_for('static', filename='tradingview_executor.js') }}?v=1.0"></script>
     <script src="{{ url_for('static', filename='discord.js') }}?v=1.0"></script>

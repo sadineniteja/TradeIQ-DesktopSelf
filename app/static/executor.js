@@ -1,5 +1,229 @@
 // Smart Trade Executor UI Logic
 
+// ==================== Trading Module & Account Selection ====================
+
+// State for selected module and account
+let executorSelectedModule = null;  // 'webull' or 'etrade'
+let executorSelectedAccountId = null;
+let executorAccounts = [];
+
+// Available trading modules configuration
+const TRADING_MODULES = {
+    webull: {
+        name: 'Webull',
+        icon: '📊',
+        color: '#10b981',
+        description: 'Options & Equity Trading',
+        accountsEndpoint: '/api/webull/accounts'
+    },
+    etrade: {
+        name: 'E*TRADE',
+        icon: '📈',
+        color: '#3b82f6',
+        description: 'Options & Equity Trading',
+        accountsEndpoint: '/api/etrade/accounts'
+    }
+};
+
+// Load and display available trading modules
+async function executorLoadModules() {
+    const container = document.getElementById('executor-module-list');
+    if (!container) return;
+    
+    let html = '';
+    
+    for (const [moduleId, config] of Object.entries(TRADING_MODULES)) {
+        const isSelected = executorSelectedModule === moduleId;
+        const borderColor = isSelected ? config.color : '#e5e7eb';
+        const bgColor = isSelected ? `${config.color}15` : 'white';
+        
+        html += `
+            <div id="executor-module-${moduleId}" 
+                 onclick="executorSelectModule('${moduleId}')"
+                 style="flex: 1; min-width: 180px; max-width: 250px; padding: 20px; background: ${bgColor}; 
+                        border: 3px solid ${borderColor}; border-radius: 12px; cursor: pointer; 
+                        text-align: center; transition: all 0.2s ease;"
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2rem; margin-bottom: 8px;">${config.icon}</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: #1f2937;">${config.name}</div>
+                <div style="font-size: 0.8rem; color: #6b7280; margin-top: 4px;">${config.description}</div>
+                ${isSelected ? `<div style="margin-top: 10px; color: ${config.color}; font-weight: 600;">✓ Selected</div>` : ''}
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+// Select a trading module and load its accounts
+async function executorSelectModule(moduleId) {
+    const config = TRADING_MODULES[moduleId];
+    if (!config) return;
+    
+    executorSelectedModule = moduleId;
+    executorSelectedAccountId = null;
+    executorAccounts = [];
+    
+    // Update hidden inputs
+    document.getElementById('executor-platform').value = moduleId;
+    document.getElementById('executor-account-id').value = '';
+    
+    // Re-render modules to show selection
+    executorLoadModules();
+    
+    // Show account section and load accounts
+    const accountSection = document.getElementById('executor-account-section');
+    const accountList = document.getElementById('executor-account-list');
+    const statusDiv = document.getElementById('executor-module-status');
+    
+    accountSection.style.display = 'block';
+    accountList.innerHTML = '<div style="color: #6b7280;">Loading accounts...</div>';
+    
+    try {
+        const res = await fetch(config.accountsEndpoint);
+        const data = await res.json();
+        
+        if (data.success && data.accounts && data.accounts.length > 0) {
+            executorAccounts = data.accounts;
+            executorRenderAccounts();
+            
+            // Auto-select first account or default account
+            const defaultAccount = data.default_account_id 
+                ? data.accounts.find(a => a.account_id === data.default_account_id)
+                : data.accounts[0];
+            
+            if (defaultAccount) {
+                executorSelectAccount(defaultAccount.account_id || defaultAccount.id);
+            }
+            
+            statusDiv.style.display = 'none';
+        } else if (data.error) {
+            accountList.innerHTML = `<div style="color: #dc2626; padding: 15px; background: #fee2e2; border-radius: 6px;">❌ ${data.error}</div>`;
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#fee2e2';
+            statusDiv.innerHTML = `<p style="margin: 0; color: #991b1b;">⚠️ Please configure ${config.name} in its module first.</p>`;
+        } else {
+            accountList.innerHTML = `<div style="color: #6b7280; padding: 15px; background: #f3f4f6; border-radius: 6px;">No accounts found. Please configure ${config.name} first.</div>`;
+        }
+    } catch (error) {
+        console.error(`Error loading ${moduleId} accounts:`, error);
+        accountList.innerHTML = `<div style="color: #dc2626; padding: 15px; background: #fee2e2; border-radius: 6px;">❌ Error loading accounts: ${error.message}</div>`;
+    }
+    
+    // Update trade display
+    executorUpdateTradeDisplay();
+}
+
+// Render account cards
+function executorRenderAccounts() {
+    const container = document.getElementById('executor-account-list');
+    if (!container || !executorAccounts.length) return;
+    
+    const config = TRADING_MODULES[executorSelectedModule];
+    let html = '';
+    
+    executorAccounts.forEach(account => {
+        const accountId = account.account_id || account.id;
+        const accountName = account.account_name || account.name || account.nickname || `Account ${accountId}`;
+        const accountType = account.account_type || account.type || '';
+        const isSelected = executorSelectedAccountId === accountId;
+        
+        html += `
+            <div onclick="executorSelectAccount('${accountId}')"
+                 style="padding: 15px 20px; background: ${isSelected ? '#d1fae5' : 'white'}; 
+                        border: 2px solid ${isSelected ? '#10b981' : '#e5e7eb'}; border-radius: 8px; 
+                        cursor: pointer; min-width: 150px; transition: all 0.2s ease;"
+                 onmouseover="if (!${isSelected}) this.style.borderColor='#9ca3af'"
+                 onmouseout="if (!${isSelected}) this.style.borderColor='#e5e7eb'">
+                <div style="font-weight: 600; color: #1f2937;">${accountName}</div>
+                ${accountType ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${accountType}</div>` : ''}
+                <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 4px; font-family: monospace;">${accountId}</div>
+                ${isSelected ? `<div style="margin-top: 8px; color: #059669; font-weight: 600; font-size: 0.85rem;">✓ Selected</div>` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Select an account
+function executorSelectAccount(accountId) {
+    executorSelectedAccountId = accountId;
+    
+    // Update hidden input
+    document.getElementById('executor-account-id').value = accountId;
+    
+    // Re-render accounts to show selection
+    executorRenderAccounts();
+    
+    // Show selected account info
+    const account = executorAccounts.find(a => (a.account_id || a.id) === accountId);
+    const infoDiv = document.getElementById('executor-selected-account-info');
+    
+    if (account && infoDiv) {
+        const config = TRADING_MODULES[executorSelectedModule];
+        const accountName = account.account_name || account.name || account.nickname || 'Account';
+        
+        infoDiv.style.display = 'block';
+        infoDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">${config.icon}</span>
+                <div>
+                    <div style="font-weight: 600; color: #065f46;">✅ Ready to Trade</div>
+                    <div style="font-size: 0.9rem; color: #047857;">${config.name} - ${accountName}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Update trade display
+    executorUpdateTradeDisplay();
+}
+
+// Update the trade display section to show selected account
+function executorUpdateTradeDisplay() {
+    const displayDiv = document.getElementById('executor-trade-account-display');
+    if (!displayDiv) return;
+    
+    if (executorSelectedModule && executorSelectedAccountId) {
+        const config = TRADING_MODULES[executorSelectedModule];
+        const account = executorAccounts.find(a => (a.account_id || a.id) === executorSelectedAccountId);
+        const accountName = account ? (account.account_name || account.name || account.nickname || 'Account') : executorSelectedAccountId;
+        
+        displayDiv.style.background = '#d1fae5';
+        displayDiv.style.borderColor = '#10b981';
+        displayDiv.innerHTML = `
+            <p style="margin: 0; color: #065f46;">
+                <strong>✅ Trading Account Selected:</strong> ${config.icon} ${config.name} - ${accountName}
+                <span style="font-family: monospace; font-size: 0.85rem; margin-left: 10px; color: #047857;">(${executorSelectedAccountId})</span>
+            </p>
+        `;
+    } else if (executorSelectedModule) {
+        const config = TRADING_MODULES[executorSelectedModule];
+        displayDiv.style.background = '#fef3c7';
+        displayDiv.style.borderColor = '#f59e0b';
+        displayDiv.innerHTML = `
+            <p style="margin: 0; color: #92400e;">
+                <strong>⚠️ ${config.name} selected</strong> - Please select an account above.
+            </p>
+        `;
+    } else {
+        displayDiv.style.background = '#fef3c7';
+        displayDiv.style.borderColor = '#f59e0b';
+        displayDiv.innerHTML = `
+            <p style="margin: 0; color: #92400e;">
+                <strong>⚠️ No account selected.</strong> Please select a trading module and account in the section above before placing trades.
+            </p>
+        `;
+    }
+}
+
+// Initialize modules on page load
+document.addEventListener('DOMContentLoaded', function() {
+    executorLoadModules();
+});
+
 // Load enabled state on page load
 async function smartExecutorLoadEnabled() {
     try {
@@ -107,6 +331,7 @@ if (document.readyState === 'loading') {
 
 async function executorExecuteTrade() {
     const platform = document.getElementById('executor-platform').value;
+    const accountId = document.getElementById('executor-account-id').value;
     const signalTitle = document.getElementById('executor-signal-title')?.value?.trim() || '';
     const ticker = document.getElementById('executor-ticker').value.trim().toUpperCase();
     const direction = document.getElementById('executor-direction').value;
@@ -122,9 +347,21 @@ async function executorExecuteTrade() {
     const day = document.getElementById('executor-day').value.trim();
     const year = document.getElementById('executor-year').value.trim();
     
+    const resultDiv = document.getElementById('executor-result');
+    
+    // Validate trading module and account selection
+    if (!platform || !accountId) {
+        resultDiv.innerHTML = `
+            <div class="test-result error show">
+                <h3 style="margin-top: 0;">❌ Trading Account Not Selected</h3>
+                <p>Please select a <strong>Trading Module</strong> (Webull or E*TRADE) and an <strong>Account</strong> in the "Trading Module & Account" section above before executing trades.</p>
+            </div>
+        `;
+        return;
+    }
+    
     // Validate required fields
     if (!ticker || isNaN(strikePrice) || isNaN(purchasePrice)) {
-        const resultDiv = document.getElementById('executor-result');
         resultDiv.innerHTML = '<div class="test-result error show">❌ Please fill in all required fields (Ticker, Strike Price, Purchase Price)</div>';
         return;
     }
@@ -137,7 +374,8 @@ async function executorExecuteTrade() {
         strike_price: strikePrice,
         purchase_price: purchasePrice,
         input_position_size: posSize,
-        signal_title: signalTitle
+        signal_title: signalTitle,
+        account_id: accountId
     };
     
     // Add date if provided
@@ -149,15 +387,18 @@ async function executorExecuteTrade() {
         };
     }
     
-    const resultDiv = document.getElementById('executor-result');
-    
     // Show processing with input summary
+    const moduleConfig = TRADING_MODULES[platform];
+    const selectedAccount = executorAccounts.find(a => (a.account_id || a.id) === accountId);
+    const accountName = selectedAccount ? (selectedAccount.account_name || selectedAccount.name || selectedAccount.nickname || accountId) : accountId;
+    
     let processingHtml = '<div class="test-result info show">';
     processingHtml += '<h3 style="margin-top: 0;">🔄 Processing Smart Trade Execution...</h3>';
     processingHtml += '<div style="background: #f0f9ff; padding: 16px; border-radius: 8px; margin: 16px 0; border: 2px solid #0ea5e9;">';
     processingHtml += '<h4 style="margin: 0 0 12px 0;">📋 Input Summary</h4>';
     processingHtml += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 0.9rem;">';
-    processingHtml += `<div><strong>Platform:</strong> ${platform.toUpperCase()}</div>`;
+    processingHtml += `<div><strong>Platform:</strong> ${moduleConfig ? moduleConfig.icon + ' ' + moduleConfig.name : platform.toUpperCase()}</div>`;
+    processingHtml += `<div><strong>Account:</strong> ${accountName}</div>`;
     processingHtml += `<div><strong>Ticker:</strong> ${ticker}</div>`;
     processingHtml += `<div><strong>Direction:</strong> ${direction}</div>`;
     processingHtml += `<div><strong>Option Type:</strong> ${optionType}</div>`;

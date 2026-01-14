@@ -35,6 +35,12 @@ from database import Database
 from prompt_builder import PromptBuilder
 from signal_processor import SignalProcessor
 from etrade_api import EtradeAPI
+try:
+    from webull_api import WebullAPI
+    WEBULL_AVAILABLE = True
+except ImportError:
+    WEBULL_AVAILABLE = False
+    WebullAPI = None
 from discord_api import DiscordAPI
 from x_api import XAPI
 from x_signal_processor import XSignalProcessor
@@ -42,6 +48,12 @@ from grok_api import GrokAPI
 from alphavantage_api import AlphaVantageAPI
 from signals import Signals
 from trade_executor import TradeExecutor
+
+# Helper function for debug printing to stderr (avoids IPC interference)
+def debug_print(*args, **kwargs):
+    """Print to stderr to avoid interfering with IPC JSON communication"""
+    kwargs.setdefault('file', sys.stderr)
+    print(*args, **kwargs)
 from tradingview_executor import TradingViewExecutor
 from push_notifications import PushNotificationManager
 
@@ -94,12 +106,13 @@ if is_android:
             print(f"DEBUG: Template directory does not exist: {TEMPLATE_FOLDER}")
 else:
     # Running on desktop
-    # Get the app directory (parent of python directory)
+    # Get the app directory (go up two levels: python -> app -> TradeIQ-Desktop)
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-    APP_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..'))
-    TEMPLATE_FOLDER = os.path.join(APP_ROOT, 'templates')
-    STATIC_FOLDER = os.path.join(APP_ROOT, 'static')
-    # Database in app root directory
+    APP_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))  # app/ folder
+    APP_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..', '..'))  # TradeIQ-Desktop/ folder
+    TEMPLATE_FOLDER = os.path.join(APP_DIR, 'templates')
+    STATIC_FOLDER = os.path.join(APP_DIR, 'static')
+    # Database in project root directory (TradeIQ-Desktop/)
     db_path = os.path.join(APP_ROOT, 'tradeiq.db')
     # .env file path in desktop mode (app root directory)
     env_file_path = os.path.join(APP_ROOT, '.env')
@@ -215,9 +228,14 @@ snaptrade_api = None
 
 # Initialize E*TRADE API (will load credentials from database if available)
 etrade_api = EtradeAPI(db=db)
+# Initialize Webull API only if module is available
+if WEBULL_AVAILABLE:
+    webull_api = WebullAPI(db=db)
+else:
+    webull_api = None
 
-# Initialize Trade Executor
-trade_executor = TradeExecutor(snaptrade_api=snaptrade_api, etrade_api=etrade_api, db=db)
+# Initialize Trade Executor (with Webull API for order execution)
+trade_executor = TradeExecutor(snaptrade_api=snaptrade_api, etrade_api=etrade_api, db=db, webull_api=webull_api if WEBULL_AVAILABLE else None)
 
 # Initialize TradingView Executor
 tradingview_executor = TradingViewExecutor(snaptrade_api=snaptrade_api, etrade_api=etrade_api, db=db)
@@ -273,9 +291,9 @@ def is_channel_management_channel(channel_name: str) -> bool:
 # Helper function to get all channel management channel names
 def get_channel_management_channels() -> List[str]:
     """
-    Get all channel names that have signals (from trade_signals table).
+    Get all channel names from the channels table (not just ones with signals).
     Excludes special channels like 'x', 'TradingView', 'UNMATCHED'.
-    This includes "Master Channel", "remz 100k", "remz alerts", and any other channels that have signals.
+    This includes all configured channels: "Master Channel", "remz 100k", "remz alerts", "Commentary", etc.
     
     Returns:
         List of channel names
@@ -284,10 +302,10 @@ def get_channel_management_channels() -> List[str]:
         conn = db.get_connection()
         cursor = conn.cursor()
         
-        # Get all unique channel names from trade_signals table
+        # Get all channel names from channels table (not just ones with signals)
         cursor.execute("""
             SELECT DISTINCT channel_name 
-            FROM trade_signals 
+            FROM channels 
             WHERE channel_name IS NOT NULL 
             AND channel_name != ''
             AND channel_name NOT IN ('x', 'TradingView', 'UNMATCHED')
@@ -601,16 +619,26 @@ def get_channels():
     """Get all channels with token counts."""
     try:
         channels = db.get_all_channels()
+        # Debug logging to stderr (not stdout) to avoid IPC interference
+        import sys
+        print(f"[API] /api/channels: Found {len(channels)} channels", file=sys.stderr)
         
         # Add token count for each channel
         for channel in channels:
             channel_name = channel.get("channel_name")
             if channel_name:
-                prompt = db.get_channel_prompt(channel_name)
-                channel["token_count"] = estimate_tokens(prompt) if prompt else 0
+                try:
+                    prompt = db.get_channel_prompt(channel_name)
+                    channel["token_count"] = estimate_tokens(prompt) if prompt else 0
+                except Exception as prompt_error:
+                    print(f"[API] Error getting prompt for {channel_name}: {prompt_error}", file=sys.stderr)
+                    channel["token_count"] = 0
         
         return jsonify({"channels": channels}), 200
     except Exception as e:
+        print(f"[API] Error in /api/channels: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/channels/management', methods=['GET'])
@@ -1217,36 +1245,36 @@ def receive_external_signal():
     }
     """
     try:
-        # Log incoming request for debugging
-        print(f"\n{'='*80}")
-        print("📥 INCOMING WEBHOOK REQUEST")
-        print(f"{'='*80}")
-        print(f"Content-Type: {request.content_type}")
-        print(f"Method: {request.method}")
-        print(f"Raw Data: {request.get_data(as_text=True)[:500]}")
-        print(f"{'='*80}\n")
+        # Log incoming request for debugging (to stderr to avoid IPC interference)
+        debug_print(f"\n{'='*80}")
+        debug_print("📥 INCOMING WEBHOOK REQUEST")
+        debug_print(f"{'='*80}")
+        debug_print(f"Content-Type: {request.content_type}")
+        debug_print(f"Method: {request.method}")
+        debug_print(f"Raw Data: {request.get_data(as_text=True)[:500]}")
+        debug_print(f"{'='*80}\n")
         
         # Try to get data - handle JSON, form data, and plain text (TradingView sends plain text)
         data = None
         raw_data = request.get_data(as_text=True)
         
-        print(f"📋 Raw Request Data: '{raw_data}'")
-        print(f"📋 Content-Type: {request.content_type}")
+        debug_print(f"📋 Raw Request Data: '{raw_data}'")
+        debug_print(f"📋 Content-Type: {request.content_type}")
         
         if request.is_json:
             # Standard JSON request
             data = request.get_json()
-            print(f"📋 Parsed as JSON")
+            debug_print(f"📋 Parsed as JSON")
         elif request.content_type and 'application/json' in request.content_type:
             # JSON content type but not detected as JSON
             try:
                 data = json.loads(raw_data) if raw_data else {}
-                print(f"📋 Parsed as JSON from raw data")
+                debug_print(f"📋 Parsed as JSON from raw data")
             except:
                 pass
         elif request.content_type and 'text/plain' in request.content_type:
             # TradingView sends plain text - convert to our format
-            print(f"📋 Detected plain text (TradingView format)")
+            debug_print(f"📋 Detected plain text (TradingView format)")
             if raw_data:
                 # Use the plain text as the message
                 data = {
@@ -1254,39 +1282,39 @@ def receive_external_signal():
                     "message": raw_data,
                     "source": "tradingview"
                 }
-                print(f"📋 Converted plain text to message: '{raw_data[:100]}...'")
+                debug_print(f"📋 Converted plain text to message: '{raw_data[:100]}...'")
         else:
             # Try to parse as JSON from raw data
             try:
                 if raw_data:
                     data = json.loads(raw_data)
-                    print(f"📋 Parsed as JSON from raw data (fallback)")
+                    debug_print(f"📋 Parsed as JSON from raw data (fallback)")
             except:
                 # If not JSON, try form data
                 data = request.form.to_dict()
                 if data:
-                    print(f"📋 Parsed as form data")
+                    debug_print(f"📋 Parsed as form data")
                 else:
                     # Also check if data is in request.args
                     data = request.args.to_dict()
                     if data:
-                        print(f"📋 Parsed as query parameters")
+                        debug_print(f"📋 Parsed as query parameters")
         
         # Final fallback: if we have raw_data but no parsed data, treat it as plain text
         if not data and raw_data:
-            print(f"📋 Fallback: Treating raw data as plain text message")
+            debug_print(f"📋 Fallback: Treating raw data as plain text message")
             data = {
                 "title": "TradingView Alert",
                 "message": raw_data,
                 "source": "tradingview"
             }
-            print(f"📋 Converted plain text to message: '{raw_data[:100]}...'")
+            debug_print(f"📋 Converted plain text to message: '{raw_data[:100]}...'")
         
         if not data:
-            print("⚠️ No data found in request")
+            debug_print("⚠️ No data found in request")
             return jsonify({"error": "No data provided"}), 400
         
-        print(f"📋 Final Parsed Data: {json.dumps(data, indent=2)}")
+        debug_print(f"📋 Final Parsed Data: {json.dumps(data, indent=2)}")
         
         # Handle TradingView webhook format - they might send data differently
         # TradingView might send the entire payload as a string in 'message' field
@@ -1311,7 +1339,7 @@ def receive_external_signal():
             title = data.get('ticker', data.get('symbol', data.get('text', ''))).strip() if isinstance(data.get('ticker', data.get('symbol', data.get('text', ''))), str) else ''
             message = data.get('alert', data.get('content', data.get('body', ''))).strip() if isinstance(data.get('alert', data.get('content', data.get('body', ''))), str) else ''
         
-        print(f"📝 Extracted - Title: '{title}', Message: '{message[:100]}...', Source: '{source}'")
+        debug_print(f"📝 Extracted - Title: '{title}', Message: '{message[:100]}...', Source: '{source}'")
         
         # Validate that we have at least title or message
         if not title and not message:
@@ -1977,8 +2005,34 @@ def receive_external_signal():
                             }), 200
                         
                         # Prepare data for Smart Trade Executor
-                        # Determine platform (default to snaptrade)
-                        platform = "snaptrade"  # Default platform
+                        # Determine platform - use webull if available with configured account
+                        platform = "webull"  # Default to webull
+                        account_id = None
+                        
+                        # Get the default account from webull_api
+                        if WEBULL_AVAILABLE and webull_api and webull_api.is_authenticated:
+                            account_id = webull_api.default_account_id
+                            if not account_id:
+                                # Try to get accounts and use the first one
+                                try:
+                                    accounts_result = webull_api.get_accounts()
+                                    if accounts_result.get("success") and accounts_result.get("accounts"):
+                                        account_id = accounts_result["accounts"][0].get("account_id")
+                                        webull_api.default_account_id = account_id
+                                except:
+                                    pass
+                        
+                        if not account_id:
+                            # No webull account configured - skip execution
+                            debug_print(f"⚠️ Smart Executor skipped: No Webull account configured")
+                            return jsonify({
+                                "success": True,
+                                "signal_id": signal_id,
+                                "matched_channel": matched_channel,
+                                "status": "skipped",
+                                "message": "Signal processed but skipped Smart Executor (no Webull account configured)",
+                                "parsed_signal": parsed_data
+                            }), 200
                         
                         # Build executor payload from parsed data
                         executor_payload = {
@@ -1989,7 +2043,8 @@ def receive_external_signal():
                             "purchase_price": parsed_data.get("purchase_price"),
                             "input_position_size": parsed_data.get("position_size") or parsed_data.get("quantity") or 2,
                             "signal_id": signal_id,
-                            "signal_title": title if title else ""  # Pass signal title for budget/selling filter matching
+                            "signal_title": title if title else "",  # Pass signal title for budget/selling filter matching
+                            "account_id": account_id  # Include the account_id for execution
                         }
                         
                         # Add expiration date if present
@@ -2013,79 +2068,62 @@ def receive_external_signal():
                                     executor_payload["expiration_date"] = exp_date
                         
                         # Log the payload for debugging
-                        print("\n" + "="*80)
-                        print("🤖 SMART EXECUTOR HANDOFF (from /api/signals/receive)")
-                        print("="*80)
-                        print(f"Signal ID: {signal_id}")
-                        print(f"Matched Channel: {matched_channel}")
-                        print(f"Parsed Data: {json.dumps(parsed_data, indent=2, default=str)}")
-                        print(f"Executor Payload: {json.dumps(executor_payload, indent=2, default=str)}")
-                        print(f"Platform: {platform}")
-                        print("="*80 + "\n")
+                        debug_print("\n" + "="*80)
+                        debug_print("🤖 SMART EXECUTOR HANDOFF (from /api/signals/receive)")
+                        debug_print("="*80)
+                        debug_print(f"Signal ID: {signal_id}")
+                        debug_print(f"Matched Channel: {matched_channel}")
+                        debug_print(f"Account ID: {account_id}")
+                        debug_print(f"Platform: {platform}")
+                        debug_print("="*80 + "\n")
                         
-                        # Execute via Smart Trade Executor
-                        try:
-                            execution_result = trade_executor.execute_trade(executor_payload, platform)
-                            
-                            print("\n" + "="*80)
-                            print("🤖 SMART EXECUTOR RESULT (from /api/signals/receive)")
-                            print("="*80)
-                            print(f"Success: {execution_result.get('success')}")
-                            if execution_result.get('success'):
-                                print(f"Order ID: {execution_result.get('order_id')}")
-                                print(f"Filled Price: ${execution_result.get('filled_price')}")
-                                print(f"Position Size: {execution_result.get('position_size')}")
-                            else:
-                                print(f"Failed at Step: {execution_result.get('step_failed')}")
-                                print(f"Error: {execution_result.get('error')}")
-                                if execution_result.get('log'):
-                                    print(f"Execution Log (last 5 lines):")
-                                    log_lines = execution_result.get('log', [])
-                                    for line in log_lines[-5:]:
-                                        print(f"  {line}")
-                            print("="*80 + "\n")
-                            
-                            if execution_result["success"]:
-                                db.update_signal_status(signal_id, "executed")
-                                return jsonify({
-                                    "success": True,
-                                    "signal_id": signal_id,
-                                    "matched_channel": matched_channel,
-                                    "status": "executed",
-                                    "message": "Signal matched, processed, and executed via Smart Executor",
-                                    "parsed_signal": parsed_data,
-                                    "executor_result": {
-                                        "order_id": execution_result.get("order_id"),
-                                        "filled_price": execution_result.get("filled_price"),
-                                        "position_size": execution_result.get("position_size"),
-                                        "expiration_date": execution_result.get("expiration_date"),
-                                        "fill_attempts": execution_result.get("fill_attempts")
-                                    }
-                                }), 200
-                            else:
-                                db.update_signal_status(signal_id, "execution_failed")
-                                return jsonify({
-                                    "success": True,
-                                    "signal_id": signal_id,
-                                    "matched_channel": matched_channel,
-                                    "status": "execution_failed",
-                                    "message": f"Signal processed but Smart Executor failed at step {execution_result.get('step_failed', 'unknown')}",
-                                    "parsed_signal": parsed_data,
-                                    "executor_error": execution_result.get("error"),
-                                    "executor_log": execution_result.get("log", [])
-                                }), 200
-                        except Exception as executor_error:
-                            print(f"Error executing trade via Smart Executor: {executor_error}")
-                            db.update_signal_status(signal_id, "execution_error")
-                            return jsonify({
-                                "success": True,
-                                "signal_id": signal_id,
-                                "matched_channel": matched_channel,
-                                "status": "execution_error",
-                                "message": "Signal processed but Smart Executor encountered an error",
-                                "parsed_signal": parsed_data,
-                                "error": str(executor_error)
-                            }), 200
+                        # Mark signal as "executing" and return immediately
+                        # Execute Smart Trade in background thread so signal shows on dashboard right away
+                        db.update_signal_status(signal_id, "executing")
+                        
+                        def run_executor_background(sig_id, payload, plat, parsed):
+                            """Background thread to run Smart Trade Executor"""
+                            try:
+                                debug_print(f"🤖 [BACKGROUND] Starting Smart Executor for signal {sig_id}")
+                                execution_result = trade_executor.execute_trade(payload, plat)
+                                
+                                debug_print("\n" + "="*80)
+                                debug_print(f"🤖 SMART EXECUTOR RESULT (signal {sig_id})")
+                                debug_print("="*80)
+                                debug_print(f"Success: {execution_result.get('success')}")
+                                if execution_result.get('success'):
+                                    debug_print(f"Order ID: {execution_result.get('order_id')}")
+                                    debug_print(f"Filled Price: ${execution_result.get('filled_price')}")
+                                    debug_print(f"Position Size: {execution_result.get('position_size')}")
+                                    db.update_signal_status(sig_id, "executed")
+                                else:
+                                    debug_print(f"Failed at Step: {execution_result.get('step_failed')}")
+                                    debug_print(f"Error: {execution_result.get('error')}")
+                                    db.update_signal_status(sig_id, "execution_failed")
+                                debug_print("="*80 + "\n")
+                                
+                            except Exception as executor_error:
+                                debug_print(f"❌ [BACKGROUND] Error executing trade for signal {sig_id}: {executor_error}")
+                                db.update_signal_status(sig_id, "execution_error")
+                        
+                        # Start executor in background thread
+                        import threading
+                        executor_thread = threading.Thread(
+                            target=run_executor_background,
+                            args=(signal_id, executor_payload, platform, parsed_data),
+                            daemon=True
+                        )
+                        executor_thread.start()
+                        
+                        # Return immediately - signal will appear on dashboard right away
+                        return jsonify({
+                            "success": True,
+                            "signal_id": signal_id,
+                            "matched_channel": matched_channel,
+                            "status": "executing",
+                            "message": "Signal matched and Smart Executor started in background",
+                            "parsed_signal": parsed_data
+                        }), 200
                     else:
                         # Parsing failed, but signal was matched
                         print("\n" + "="*80)
@@ -3196,6 +3234,114 @@ def etrade_preview_equity_order(account_id):
     return jsonify(error_response), 400
 
 
+# ============================================================================
+# Webull API Routes
+# ============================================================================
+
+@app.route('/api/webull/status', methods=['GET'])
+def webull_status():
+    if not WEBULL_AVAILABLE or webull_api is None:
+        return jsonify({
+            "authenticated": False,
+            "has_credentials": False,
+            "error": "Webull module not installed. Install with: pip install webull-openapi-python-sdk"
+        }), 200
+    return jsonify({
+        "authenticated": webull_api.is_authenticated,
+        "has_credentials": bool(webull_api.app_key and webull_api.app_secret)
+    }), 200
+
+
+@app.route('/api/webull/config', methods=['GET'])
+def webull_get_config():
+    return jsonify({
+        "success": True,
+        "has_app_key": bool(db.get_setting("webull_app_key", "")),
+        "has_app_secret": bool(db.get_setting("webull_app_secret", "")),
+        "app_key": db.get_setting("webull_app_key", ""),
+        "app_secret": db.get_setting("webull_app_secret", ""),
+    }), 200
+
+
+@app.route('/api/webull/config', methods=['POST'])
+def webull_save_config():
+    if not WEBULL_AVAILABLE or webull_api is None:
+        return jsonify({"success": False, "error": "Webull module not installed. Install with: pip install webull-openapi-python-sdk"}), 400
+    data = request.get_json() or {}
+    app_key = data.get("app_key", "").strip()
+    app_secret = data.get("app_secret", "").strip()
+    
+    if not app_key or not app_secret:
+        return jsonify({"success": False, "error": "App key and secret are required"}), 400
+    
+    result = webull_api.save_config(app_key, app_secret)
+    if result.get("success"):
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 400
+
+
+
+
+@app.route('/api/webull/accounts/<account_id>/place-option-order', methods=['POST'])
+def webull_place_option_order(account_id):
+    if not WEBULL_AVAILABLE or webull_api is None:
+        return jsonify({"success": False, "error": "Webull module not installed. Install with: pip install webull-openapi-python-sdk"}), 400
+    data = request.get_json() or {}
+    
+    required_fields = ['symbol', 'strike_price', 'init_exp_date', 'option_type', 'side', 'quantity']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"success": False, "error": f"{field} is required"}), 400
+    
+    result = webull_api.place_option_order(
+        account_id=account_id,
+        symbol=data.get('symbol'),
+        strike_price=data.get('strike_price'),
+        init_exp_date=data.get('init_exp_date'),
+        option_type=data.get('option_type'),
+        side=data.get('side'),
+        quantity=int(data.get('quantity')),
+        order_type=data.get('order_type', 'LIMIT'),
+        limit_price=data.get('limit_price'),
+        time_in_force=data.get('time_in_force', 'GTC')
+    )
+    
+    if result.get("success"):
+        return jsonify(result), 200
+    else:
+        status_code = 400 if not result.get("order_valid") else 417
+        return jsonify(result), status_code
+
+
+@app.route('/api/webull/accounts/<account_id>/place-equity-order', methods=['POST'])
+def webull_place_equity_order(account_id):
+    if not WEBULL_AVAILABLE or webull_api is None:
+        return jsonify({"success": False, "error": "Webull module not installed. Install with: pip install webull-openapi-python-sdk"}), 400
+    data = request.get_json() or {}
+    
+    required_fields = ['symbol', 'side', 'quantity']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"success": False, "error": f"{field} is required"}), 400
+    
+    result = webull_api.place_equity_order(
+        account_id=account_id,
+        symbol=data.get('symbol'),
+        side=data.get('side'),
+        quantity=int(data.get('quantity')),
+        order_type=data.get('order_type', 'LIMIT'),
+        limit_price=data.get('limit_price'),
+        time_in_force=data.get('time_in_force', 'GTC'),
+        extended_hours_trading=data.get('extended_hours_trading', False)
+    )
+    
+    if result.get("success"):
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 400
+
+
 @app.route('/api/etrade/accounts/<account_id>/place-equity-order', methods=['POST'])
 def etrade_place_equity_order(account_id):
     payload = request.get_json() or {}
@@ -3459,9 +3605,10 @@ def webull_check_token():
 
 @app.route('/api/webull/accounts', methods=['GET'])
 def webull_get_accounts():
-    if not webull_api.is_authenticated:
-        return jsonify({"success": False, "error": "Not authenticated", "accounts": []}), 401
-    result = webull_api.get_accounts_list()
+    if not WEBULL_AVAILABLE or webull_api is None:
+        return jsonify({"success": False, "error": "Webull module not installed. Install with: pip install webull-openapi-python-sdk"}), 400
+    # Don't check is_authenticated here - let get_accounts handle it and return proper error
+    result = webull_api.get_accounts()
     if result.get("success"):
         return jsonify({
             "success": True,
@@ -3496,6 +3643,8 @@ def webull_set_default_account(account_id):
 
 @app.route('/api/webull/accounts/<account_id>/balance', methods=['GET'])
 def webull_get_balance(account_id):
+    if not WEBULL_AVAILABLE or webull_api is None:
+        return jsonify({"success": False, "error": "Webull module not installed. Install with: pip install webull-openapi-python-sdk"}), 400
     # Balance functionality is disabled as requested
     result = webull_api.get_account_balance(account_id)
     return jsonify({
@@ -4920,6 +5069,22 @@ def unsubscribe_push():
             push_manager.remove_subscription(endpoint)
         
         return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/push/subscriptions/clear-all', methods=['DELETE'])
+def clear_all_push_subscriptions():
+    """Clear all push subscriptions (useful when many are expired)"""
+    try:
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM push_subscriptions")
+        count = cursor.fetchone()[0]
+        cursor.execute("DELETE FROM push_subscriptions")
+        conn.commit()
+        conn.close()
+        debug_print(f"[PUSH] Cleared {count} push subscriptions")
+        return jsonify({"success": True, "deleted": count}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
